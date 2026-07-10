@@ -25,7 +25,7 @@ function getTimeLabel(progress: number) {
   }
 
   if (progress < 0.68) {
-    return "Blue hour";
+    return "Dusk";
   }
 
   return "Under every sky";
@@ -190,7 +190,7 @@ export default function MemoryWalk({
     >
       <div className="memory-walk-hud" aria-live="polite">
         <div>
-          <span className="memory-walk-kicker">The sky is changing</span>
+          <span className="memory-walk-kicker">The sky is changing, but my love for you remains constant</span>
           <strong>{getTimeLabel(progress)}</strong>
         </div>
         <div

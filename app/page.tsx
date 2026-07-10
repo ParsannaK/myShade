@@ -21,14 +21,15 @@ type Track = {
   src: string;
 };
 
-const PASSCODES = ["shade50", "shadé50", "50months"];
+const PASSCODES = ["shadesanna","shade50", "shadé50", "50months"];
 
 const birthdayLetter = [
-  "My love, happy birthday.",
-  "By the time this day arrives, we will have loved each other through fifty months of ordinary days, impossible days, silly days, and the kind of days I wish I could bottle forever.",
-  "I made this little world because I wanted you to have a place that feels like us: warm, playful, full of memories, and completely yours. Every stop is one more way of saying that I see you, I choose you, and I am so grateful I get to love you.",
-  "You are my favorite person, my safest place, and the future I keep reaching for. If I could give you the world, I would start here.",
-  "I love you endlessly.",
+  "Will write this soon",
+  // "My love, happy birthday.",
+  // "By the time this day arrives, we will have loved each other through fifty months of ordinary days, impossible days, silly days, and the kind of days I wish I could bottle forever.",
+  // "I made this little world because I wanted you to have a place that feels like us: warm, playful, full of memories, and completely yours. Every stop is one more way of saying that I see you, I choose you, and I am so grateful I get to love you.",
+  // "You are my favorite person, my safest place, and the future I keep reaching for. If I could give you the world, I would start here.",
+  // "I love you endlessly.",
 ];
 
 const loveReasons = [
@@ -147,61 +148,61 @@ const starQuote =
 const memories: Memory[] = [
   {
     id: "senior-sunset",
-    title: "Senior Sunset",
-    place: "The park swing",
-    date: "Where this story opens",
+    title: "First memory",
+    place: "location",
+    date: "date",
     note:
-      "A warm sky, a swing, your hand in mine, and one of those moments that still feels golden when I think about it.",
+      "note",
     image: "/photos/senior-sunset.jpg",
     palette: "rose",
   },
   {
     id: "first-adventure",
-    title: "First Adventure",
-    place: "Our little beginning",
-    date: "Memory chapter 2",
+    title: "second memory",
+    place: "location",
+    date: "date",
     note:
-      "The kind of day where everything felt new, and somehow still felt like we had been finding our way to each other forever.",
+      "note",
     image: "/photos/first-adventure.jpg",
     palette: "gold",
   },
   {
     id: "favorite-laugh",
-    title: "That Laugh",
-    place: "Somewhere only we understand",
-    date: "Memory chapter 3",
+    title: "third memory",
+    place: "location",
+    date: "date",
     note:
-      "One of my favorite sounds in the world is you laughing at something we both know is ridiculous.",
+      "note",
     image: "/photos/favorite-laugh.jpg",
     palette: "teal",
   },
   {
     id: "quiet-day",
-    title: "A Quiet Day",
-    place: "The soft middle of us",
-    date: "Memory chapter 4",
+    title: "fourth memory",
+    place: "location",
+    date: "date",
     note:
-      "Not every perfect memory is loud. Some are just us existing near each other and making the world feel gentle.",
+      "note",
     image: "/photos/quiet-day.jpg",
     palette: "violet",
   },
   {
     id: "big-dreams",
-    title: "Big Dreams",
-    place: "Talking about forever",
-    date: "Memory chapter 5",
+    title: "fifth memory",
+    place: "location",
+    date: "date",
     note:
-      "I love the way our future sounds when we talk about it together, like something bright we are building one day at a time.",
+      "note",
     image: "/photos/big-dreams.jpg",
     palette: "blue",
   },
   {
     id: "fifty-months",
-    title: "Fifty Months",
-    place: "Still choosing you",
-    date: "Birthday chapter",
+    title: "sixth memory",
+    place: "location",
+    date: "date",
     note:
-      "Fifty months of loving you, learning you, missing you, laughing with you, and knowing I would choose you again.",
+      "note",
     image: "/photos/fifty-months.jpg",
     palette: "peach",
   },
@@ -211,8 +212,8 @@ const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
 const tracks: Track[] = [
   {
-    title: "Honeybee temp",
-    artist: "Olivia Rodrigo until your cover is ready",
+    title: "honeybee",
+    artist: "Olivia Rodrigo",
     src: "/audio/honeybeeOriginal.mp3",
   },
   {
@@ -242,6 +243,7 @@ export default function Home() {
   const [selectedReason, setSelectedReason] = useState(loveReasons[0]);
   const [reasonVisible, setReasonVisible] = useState(false);
   const [foundFireflies, setFoundFireflies] = useState<number[]>([]);
+  const [sceneTransitioning, setSceneTransitioning] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [pathReachedNight, setPathReachedNight] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
@@ -249,6 +251,7 @@ export default function Home() {
   const [audioStatus, setAudioStatus] = useState("Waiting for your first click.");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const reasonTimeoutRef = useRef<number | null>(null);
+  const sceneTransitionTimeoutsRef = useRef<number[]>([]);
 
   function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -271,12 +274,30 @@ export default function Home() {
           });
       }
 
-      setIsUnlocked(true);
       setPasscodeError("");
+      sceneTransitionTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
+      sceneTransitionTimeoutsRef.current = [];
+
+      if (reducedMotion) {
+        setIsUnlocked(true);
+        return;
+      }
+
+      setSceneTransitioning(true);
+      sceneTransitionTimeoutsRef.current = [
+        window.setTimeout(() => {
+          setIsUnlocked(true);
+          window.scrollTo(0, 0);
+        }, 720),
+        window.setTimeout(() => {
+          setSceneTransitioning(false);
+          sceneTransitionTimeoutsRef.current = [];
+        }, 1750),
+      ];
       return;
     }
 
-    setPasscodeError("Not quite. Try the one made for her.");
+    setPasscodeError("Try again gorgeous :)");
   }
 
   function toggleAudio() {
@@ -352,6 +373,8 @@ export default function Home() {
       if (reasonTimeoutRef.current) {
         window.clearTimeout(reasonTimeoutRef.current);
       }
+
+      sceneTransitionTimeoutsRef.current.forEach((timeout) => window.clearTimeout(timeout));
     };
   }, []);
 
@@ -395,10 +418,9 @@ export default function Home() {
         </div>
         <section className="gate-panel" aria-labelledby="gate-title">
           <div className="gate-kicker">For Shadé</div>
-          <h1 id="gate-title">A little world for your birthday</h1>
+          <h1 id="gate-title">Let's enter our little world</h1>
           <p>
-            Fifty months of us, tucked behind one tiny secret. Enter the
-            passcode to begin.
+            From the day we met, I have been building a world for us in my heart, and I want to share it with you, my Shadé.
           </p>
           <form onSubmit={unlock} className="passcode-form">
             <label htmlFor="passcode">Passcode</label>
@@ -409,8 +431,9 @@ export default function Home() {
                 onChange={(event) => setPasscode(event.target.value)}
                 autoComplete="off"
                 spellCheck={false}
+                disabled={sceneTransitioning}
               />
-              <button type="submit">Enter</button>
+              <button type="submit" disabled={sceneTransitioning}>Enter</button>
             </div>
             {passcodeError ? (
               <p className="form-error" role="alert">
@@ -436,7 +459,7 @@ export default function Home() {
         />
         <div className="hero-shade" />
         <div className="hero-content">
-          <h1 id="hero-title">Happy birthday my Shadé</h1>
+          <h1 id="hero-title">Happy 22nd birthday my Shadé</h1>
           <p>
             In every lifetime, in every little world, my heart would still find
             its way back to you.
@@ -481,10 +504,10 @@ export default function Home() {
         aria-labelledby="world-title"
       >
         <div className="section-heading">
-          <p className="eyebrow">The memory path</p>
-          <h2 id="world-title">A little park built from our favorite days</h2>
+          <p className="eyebrow">Our memory path</p>
+          <h2 id="world-title">A little park built from some of our favorite days</h2>
           <p>
-            Walk with the sunset at your back. Every glowing board holds a
+            Walk with the sunset at your back. Every board holds a
             little piece of us.
           </p>
         </div>
@@ -508,7 +531,7 @@ export default function Home() {
         <p className="scroll-cue">
           {pathReachedNight
             ? "The night found us. The fireflies are waiting below."
-            : "The sun keeps setting as the path carries you to the right."}
+            : "With every step we take together, a new star wakes up in the sky."}
         </p>
       </section>
 
@@ -591,7 +614,7 @@ export default function Home() {
               ×
             </button>
             <p className="eyebrow">A letter for you</p>
-            <h2 id="letter-title">My favorite person</h2>
+            <h2 id="letter-title">Still working on the letter</h2>
             {birthdayLetter.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
@@ -624,7 +647,7 @@ export default function Home() {
                   event.currentTarget.style.display = "none";
                 }}
               />
-              <span>Drop photo here</span>
+              <span>I will put photo here</span>
             </div>
             <div className="memory-copy">
               <p className="eyebrow">{activeMemory.date}</p>
@@ -637,6 +660,7 @@ export default function Home() {
       ) : null}
     </main>
       )}
+      {sceneTransitioning ? <div className="scene-transition" aria-hidden="true" /> : null}
     </>
   );
 }

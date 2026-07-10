@@ -30,7 +30,7 @@ test("server-renders the birthday experience shell", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>For Shadé<\/title>/i);
-  assert.match(html, /A little world for your birthday/);
+  assert.match(html, /Let's enter our little world/);
   assert.match(html, /For Shadé/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });

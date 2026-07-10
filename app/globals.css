@@ -333,6 +333,11 @@ label:active,
   border-color: var(--teal);
 }
 
+.passcode-row input:disabled,
+.passcode-row button:disabled {
+  opacity: 0.72;
+}
+
 .passcode-row button,
 .primary-button,
 .play-button {
@@ -366,6 +371,40 @@ label:active,
       #171221 86%,
       #111528 100%
     );
+  animation: birthdaySiteReveal 1.1s ease;
+}
+
+.scene-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(23, 18, 33, 0.92), #020109 58%),
+    #020109;
+  pointer-events: none;
+  animation: sceneTransition 1.75s ease both;
+}
+
+@keyframes sceneTransition {
+  0% {
+    opacity: 0;
+  }
+  38%,
+  58% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes birthdaySiteReveal {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .heartfall {
@@ -620,18 +659,52 @@ label:active,
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 24px;
+  width: 92px;
+  height: 66px;
   background: #ffe7b3;
-  box-shadow: inset 0 -4px #e09f69;
+  box-shadow:
+    inset 0 -8px #e09f69,
+    inset 0 0 0 5px rgba(255, 247, 234, 0.22),
+    0 8px 0 rgba(58, 38, 51, 0.32);
 }
 
 .floating-letter span {
-  width: 24px;
-  height: 24px;
-  border-right: 4px solid #d27473;
-  border-bottom: 4px solid #d27473;
-  transform: rotate(45deg) translateY(-4px);
+  position: relative;
+  z-index: 3;
+  width: 16px;
+  height: 16px;
+  border: 3px solid #9b4d59;
+  background: #d27473;
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 3px rgba(255, 247, 234, 0.2);
+}
+
+.floating-letter::before,
+.floating-letter::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.floating-letter::before {
+  inset: 8px 10px auto;
+  height: 35px;
+  background:
+    linear-gradient(145deg, transparent 0 47%, #d27473 48% 52%, transparent 53%),
+    linear-gradient(215deg, transparent 0 47%, #d27473 48% 52%, transparent 53%),
+    linear-gradient(180deg, #fff0bd 0%, #ffe7b3 100%);
+  clip-path: polygon(0 0, 50% 76%, 100% 0, 100% 26%, 50% 96%, 0 26%);
+  opacity: 0.95;
+  z-index: 1;
+}
+
+.floating-letter::after {
+  inset: 14px 10px 10px;
+  background:
+    linear-gradient(32deg, transparent 0 48%, #d27473 49% 52%, transparent 53%),
+    linear-gradient(-32deg, transparent 0 48%, #d27473 49% 52%, transparent 53%),
+    linear-gradient(180deg, transparent 0 54%, rgba(154, 91, 53, 0.16) 55% 60%, transparent 61%);
+  z-index: 2;
 }
 
 .floating-letter {
@@ -639,8 +712,6 @@ label:active,
   right: clamp(22px, 6vw, 76px);
   bottom: clamp(32px, 10vh, 88px);
   z-index: 3;
-  width: 92px;
-  height: 66px;
   border: 4px solid #3a2633;
   animation: letterFloat 2.6s steps(3) infinite;
 }
@@ -1804,8 +1875,10 @@ label:active,
   inset: 0;
   z-index: 20;
   display: grid;
+  align-items: center;
+  justify-items: center;
   place-items: center;
-  overflow-y: auto;
+  overflow: hidden;
   background: rgba(9, 7, 13, 0.72);
   padding: 24px;
 }
@@ -1820,7 +1893,14 @@ label:active,
     repeating-linear-gradient(0deg, transparent 0 13px, rgba(185, 99, 90, 0.06) 13px 14px);
   color: #271929;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: clamp(28px, 5vw, 54px);
+}
+
+.letter-modal {
+  width: min(100%, 980px);
 }
 
 .letter-modal h2 {
@@ -1976,6 +2056,8 @@ label:active,
   .gate-particles span,
   .gate-panel,
   .gate-panel::before,
+  .birthday-site,
+  .scene-transition,
   .floating-letter {
     animation: none;
   }
