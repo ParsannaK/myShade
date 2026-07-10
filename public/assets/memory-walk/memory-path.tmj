@@ -1,0 +1,102 @@
+{
+  "compressionlevel": -1,
+  "height": 12,
+  "infinite": false,
+  "layers": [
+    {
+      "draworder": "topdown",
+      "id": 1,
+      "name": "Memory Stops",
+      "objects": [
+        {
+          "id": 1,
+          "name": "Senior Sunset",
+          "point": true,
+          "properties": [
+            { "name": "memoryId", "type": "string", "value": "senior-sunset" },
+            { "name": "landmark", "type": "string", "value": "swing" }
+          ],
+          "type": "memory",
+          "x": 430,
+          "y": 565
+        },
+        {
+          "id": 2,
+          "name": "First Adventure",
+          "point": true,
+          "properties": [
+            { "name": "memoryId", "type": "string", "value": "first-adventure" },
+            { "name": "landmark", "type": "string", "value": "picnic" }
+          ],
+          "type": "memory",
+          "x": 965,
+          "y": 570
+        },
+        {
+          "id": 3,
+          "name": "That Laugh",
+          "point": true,
+          "properties": [
+            { "name": "memoryId", "type": "string", "value": "favorite-laugh" },
+            { "name": "landmark", "type": "string", "value": "garden" }
+          ],
+          "type": "memory",
+          "x": 1510,
+          "y": 562
+        },
+        {
+          "id": 4,
+          "name": "A Quiet Day",
+          "point": true,
+          "properties": [
+            { "name": "memoryId", "type": "string", "value": "quiet-day" },
+            { "name": "landmark", "type": "string", "value": "bench" }
+          ],
+          "type": "memory",
+          "x": 2070,
+          "y": 568
+        },
+        {
+          "id": 5,
+          "name": "Big Dreams",
+          "point": true,
+          "properties": [
+            { "name": "memoryId", "type": "string", "value": "big-dreams" },
+            { "name": "landmark", "type": "string", "value": "lantern-grove" }
+          ],
+          "type": "memory",
+          "x": 2645,
+          "y": 565
+        },
+        {
+          "id": 6,
+          "name": "Fifty Months",
+          "point": true,
+          "properties": [
+            { "name": "memoryId", "type": "string", "value": "fifty-months" },
+            { "name": "landmark", "type": "string", "value": "overlook" }
+          ],
+          "type": "memory",
+          "x": 3230,
+          "y": 560
+        }
+      ],
+      "opacity": 1,
+      "type": "objectgroup",
+      "visible": true,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "nextlayerid": 2,
+  "nextobjectid": 7,
+  "orientation": "orthogonal",
+  "renderorder": "right-down",
+  "tiledversion": "1.11.2",
+  "tileheight": 60,
+  "tilesets": [],
+  "tilewidth": 60,
+  "type": "map",
+  "version": "1.10",
+  "width": 60
+}

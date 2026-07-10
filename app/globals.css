@@ -78,16 +78,108 @@ label:active,
 }
 
 .gate-screen {
+  position: relative;
   display: grid;
   min-height: 100vh;
   place-items: center;
+  isolation: isolate;
+  overflow: hidden;
   padding: 24px;
   background:
     linear-gradient(rgba(18, 15, 24, 0.08), rgba(18, 15, 24, 0.78)),
     url("/assets/senior-sunset-swing.png") center / cover;
 }
 
+.gate-screen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 22% 24%, rgba(255, 209, 102, 0.18), transparent 16rem),
+    radial-gradient(circle at 76% 38%, rgba(244, 123, 143, 0.14), transparent 18rem),
+    linear-gradient(120deg, transparent 0%, rgba(255, 247, 234, 0.12) 48%, transparent 62%);
+  mix-blend-mode: screen;
+  opacity: 0.62;
+  animation: gateLightSweep 12s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.gate-aurora {
+  position: absolute;
+  inset: -16% -10%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 34% 50%, rgba(255, 209, 102, 0.18), transparent 34%),
+    radial-gradient(ellipse at 66% 42%, rgba(85, 214, 190, 0.1), transparent 30%);
+  filter: blur(18px);
+  opacity: 0.55;
+  animation: gateAurora 16s steps(5) infinite;
+  pointer-events: none;
+}
+
+.gate-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gate-particles span {
+  position: absolute;
+  left: calc(var(--gate-x) * 1%);
+  bottom: -36px;
+  width: var(--gate-size);
+  height: var(--gate-size);
+  background: var(--gate-color);
+  opacity: var(--gate-opacity);
+  box-shadow:
+    0 0 10px var(--gate-glow),
+    0 0 22px rgba(255, 209, 102, 0.24);
+  image-rendering: pixelated;
+  animation: gateParticleFloat var(--gate-duration) linear infinite;
+  animation-delay: var(--gate-delay);
+}
+
+.gate-particles span::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  background: rgba(255, 247, 234, 0.82);
+  opacity: 0.62;
+}
+
+.gate-particles span:nth-child(1) { --gate-x: 4; --gate-size: 8px; --gate-opacity: 0.6; --gate-duration: 12s; --gate-delay: -2s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.8); }
+.gate-particles span:nth-child(2) { --gate-x: 10; --gate-size: 5px; --gate-opacity: 0.42; --gate-duration: 15s; --gate-delay: -7s; --gate-color: #fff0a5; --gate-glow: rgba(255, 240, 165, 0.76); }
+.gate-particles span:nth-child(3) { --gate-x: 16; --gate-size: 7px; --gate-opacity: 0.48; --gate-duration: 13s; --gate-delay: -4s; --gate-color: #ffb36c; --gate-glow: rgba(255, 179, 108, 0.74); }
+.gate-particles span:nth-child(4) { --gate-x: 22; --gate-size: 6px; --gate-opacity: 0.36; --gate-duration: 18s; --gate-delay: -11s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.72); }
+.gate-particles span:nth-child(5) { --gate-x: 28; --gate-size: 9px; --gate-opacity: 0.44; --gate-duration: 16s; --gate-delay: -5s; --gate-color: #ffe7b3; --gate-glow: rgba(255, 231, 179, 0.76); }
+.gate-particles span:nth-child(6) { --gate-x: 35; --gate-size: 5px; --gate-opacity: 0.5; --gate-duration: 11s; --gate-delay: -9s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.78); }
+.gate-particles span:nth-child(7) { --gate-x: 42; --gate-size: 7px; --gate-opacity: 0.38; --gate-duration: 17s; --gate-delay: -1s; --gate-color: #ffb36c; --gate-glow: rgba(255, 179, 108, 0.7); }
+.gate-particles span:nth-child(8) { --gate-x: 49; --gate-size: 6px; --gate-opacity: 0.45; --gate-duration: 14s; --gate-delay: -8s; --gate-color: #fff0a5; --gate-glow: rgba(255, 240, 165, 0.76); }
+.gate-particles span:nth-child(9) { --gate-x: 56; --gate-size: 8px; --gate-opacity: 0.4; --gate-duration: 19s; --gate-delay: -14s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.72); }
+.gate-particles span:nth-child(10) { --gate-x: 63; --gate-size: 5px; --gate-opacity: 0.52; --gate-duration: 12s; --gate-delay: -6s; --gate-color: #ffe7b3; --gate-glow: rgba(255, 231, 179, 0.76); }
+.gate-particles span:nth-child(11) { --gate-x: 70; --gate-size: 7px; --gate-opacity: 0.42; --gate-duration: 16s; --gate-delay: -10s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.78); }
+.gate-particles span:nth-child(12) { --gate-x: 78; --gate-size: 9px; --gate-opacity: 0.38; --gate-duration: 18s; --gate-delay: -3s; --gate-color: #ffb36c; --gate-glow: rgba(255, 179, 108, 0.7); }
+.gate-particles span:nth-child(13) { --gate-x: 86; --gate-size: 6px; --gate-opacity: 0.46; --gate-duration: 13s; --gate-delay: -12s; --gate-color: #fff0a5; --gate-glow: rgba(255, 240, 165, 0.76); }
+.gate-particles span:nth-child(14) { --gate-x: 94; --gate-size: 8px; --gate-opacity: 0.34; --gate-duration: 20s; --gate-delay: -5s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.72); }
+.gate-particles span:nth-child(15) { --gate-x: 7; --gate-size: 5px; --gate-opacity: 0.32; --gate-duration: 22s; --gate-delay: -18s; --gate-color: #ffe7b3; --gate-glow: rgba(255, 231, 179, 0.7); }
+.gate-particles span:nth-child(16) { --gate-x: 18; --gate-size: 6px; --gate-opacity: 0.4; --gate-duration: 21s; --gate-delay: -16s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.68); }
+.gate-particles span:nth-child(17) { --gate-x: 31; --gate-size: 5px; --gate-opacity: 0.34; --gate-duration: 19s; --gate-delay: -13s; --gate-color: #ffb36c; --gate-glow: rgba(255, 179, 108, 0.64); }
+.gate-particles span:nth-child(18) { --gate-x: 46; --gate-size: 7px; --gate-opacity: 0.28; --gate-duration: 23s; --gate-delay: -20s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.64); }
+.gate-particles span:nth-child(19) { --gate-x: 59; --gate-size: 5px; --gate-opacity: 0.36; --gate-duration: 22s; --gate-delay: -15s; --gate-color: #fff0a5; --gate-glow: rgba(255, 240, 165, 0.68); }
+.gate-particles span:nth-child(20) { --gate-x: 73; --gate-size: 6px; --gate-opacity: 0.3; --gate-duration: 24s; --gate-delay: -21s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.62); }
+.gate-particles span:nth-child(21) { --gate-x: 90; --gate-size: 5px; --gate-opacity: 0.35; --gate-duration: 20s; --gate-delay: -17s; --gate-color: #ffb36c; --gate-glow: rgba(255, 179, 108, 0.64); }
+.gate-particles span:nth-child(22) { --gate-x: 12; --gate-size: 9px; --gate-opacity: 0.24; --gate-duration: 25s; --gate-delay: -22s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.58); }
+.gate-particles span:nth-child(23) { --gate-x: 39; --gate-size: 6px; --gate-opacity: 0.28; --gate-duration: 26s; --gate-delay: -23s; --gate-color: #fff0a5; --gate-glow: rgba(255, 240, 165, 0.58); }
+.gate-particles span:nth-child(24) { --gate-x: 67; --gate-size: 8px; --gate-opacity: 0.26; --gate-duration: 24s; --gate-delay: -19s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.6); }
+.gate-particles span:nth-child(25) { --gate-x: 82; --gate-size: 5px; --gate-opacity: 0.3; --gate-duration: 21s; --gate-delay: -14s; --gate-color: #ffe7b3; --gate-glow: rgba(255, 231, 179, 0.6); }
+.gate-particles span:nth-child(26) { --gate-x: 97; --gate-size: 7px; --gate-opacity: 0.24; --gate-duration: 26s; --gate-delay: -24s; --gate-color: #ffd166; --gate-glow: rgba(255, 209, 102, 0.56); }
+
 .gate-panel {
+  position: relative;
+  z-index: 2;
   width: min(100%, 520px);
   border: 3px solid #fff0bd;
   background:
@@ -97,6 +189,80 @@ label:active,
     0 28px 80px rgba(0, 0, 0, 0.46),
     inset 0 0 0 4px rgba(255, 179, 108, 0.16);
   padding: clamp(28px, 5vw, 48px);
+  animation: gatePanelFloat 4.8s steps(4) infinite;
+  backdrop-filter: blur(3px);
+}
+
+.gate-panel::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 209, 102, 0.16);
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 209, 102, 0.1), transparent);
+  opacity: 0;
+  animation: gatePanelGlimmer 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes gateLightSweep {
+  0%,
+  100% {
+    opacity: 0.42;
+    transform: translateX(-8%) scale(1);
+  }
+  50% {
+    opacity: 0.72;
+    transform: translateX(8%) scale(1.04);
+  }
+}
+
+@keyframes gateAurora {
+  0%,
+  100% {
+    transform: translate3d(-2%, 2%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(3%, -2%, 0) scale(1.06);
+  }
+}
+
+@keyframes gateParticleFloat {
+  0% {
+    transform: translate3d(-8px, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(16px, -52vh, 0) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-10px, calc(-100vh - 70px), 0) rotate(-8deg);
+  }
+}
+
+@keyframes gatePanelFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes gatePanelGlimmer {
+  0%,
+  58%,
+  100% {
+    opacity: 0;
+    transform: translateX(-16%);
+  }
+  72% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 0;
+    transform: translateX(16%);
+  }
 }
 
 .gate-kicker,
@@ -563,6 +729,300 @@ label:active,
   color: #d9c5bd;
   line-height: 1.7;
   margin: 0;
+}
+
+.memory-walk-shell {
+  position: relative;
+  width: min(100%, 1180px);
+  height: clamp(540px, 62vw, 700px);
+  margin: 0 auto;
+  isolation: isolate;
+  overflow: hidden;
+  border: 4px solid #ffd58b;
+  outline: 1px solid rgba(255, 244, 220, 0.24);
+  outline-offset: -10px;
+  background:
+    linear-gradient(rgba(20, 14, 27, 0.04), rgba(17, 12, 26, 0.34)),
+    url("/assets/memory-walk/park-panorama.webp") center / cover;
+  box-shadow:
+    0 34px 100px rgba(0, 0, 0, 0.44),
+    0 0 0 10px rgba(255, 179, 108, 0.05),
+    inset 0 0 0 4px rgba(43, 25, 42, 0.48);
+  cursor: var(--heart-cursor);
+  touch-action: pan-y;
+}
+
+.memory-walk-shell:focus-visible {
+  outline: 4px solid var(--teal);
+  outline-offset: 5px;
+}
+
+.memory-walk-shell::before,
+.memory-walk-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.memory-walk-shell::before {
+  background:
+    linear-gradient(180deg, rgba(12, 8, 20, 0.32), transparent 22%, transparent 70%, rgba(11, 8, 18, 0.46)),
+    radial-gradient(ellipse at center, transparent 46%, rgba(8, 6, 14, 0.34) 100%);
+  mix-blend-mode: multiply;
+}
+
+.memory-walk-shell::after {
+  inset: 10px;
+  border: 1px solid rgba(255, 223, 163, 0.18);
+}
+
+.memory-walk-canvas,
+.memory-walk-canvas canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.memory-walk-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.memory-walk-canvas canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.memory-walk-hud {
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  right: 22px;
+  z-index: 6;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  pointer-events: none;
+  text-shadow: 0 2px 12px rgba(8, 5, 13, 0.82);
+}
+
+.memory-walk-hud > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.memory-walk-kicker {
+  color: #ffd98a;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.memory-walk-hud strong {
+  color: #fff7ea;
+  font-size: clamp(1.15rem, 2.6vw, 2rem);
+  letter-spacing: -0.035em;
+}
+
+.memory-walk-progress {
+  width: min(32vw, 290px);
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 247, 234, 0.58);
+  background: rgba(16, 10, 24, 0.54);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.32);
+}
+
+.memory-walk-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ffb36c, #f47b8f 48%, #b791ff 78%, #77a9ff);
+  box-shadow: 0 0 14px rgba(255, 209, 102, 0.58);
+  transition: width 180ms linear;
+}
+
+.memory-walk-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  background:
+    linear-gradient(rgba(26, 13, 29, 0.28), rgba(13, 13, 31, 0.62)),
+    url("/assets/memory-walk/park-panorama.webp") center / cover;
+  color: #fff1d6;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.memory-walk-loading span {
+  width: 18px;
+  height: 18px;
+  background: #ffe28d;
+  box-shadow: 0 0 10px #ffd166, 0 0 28px rgba(255, 209, 102, 0.72);
+  animation: pathLight 1.4s steps(2) infinite;
+}
+
+.memory-walk-loading p {
+  margin: 0;
+}
+
+.memory-walk-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 86px;
+  z-index: 9;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 14px;
+  min-width: min(340px, calc(100% - 34px));
+  transform: translateX(-50%);
+  border: 2px solid #ffe6a6;
+  background: rgba(31, 18, 37, 0.92);
+  color: #fff7ea;
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.42),
+    inset 0 0 0 3px rgba(255, 209, 102, 0.08);
+  padding: 12px 14px;
+  font-weight: 900;
+  text-align: left;
+  backdrop-filter: blur(8px);
+  animation: memoryPromptIn 240ms ease-out both;
+}
+
+.memory-walk-prompt span {
+  grid-column: 1;
+  color: #ffd98a;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.memory-walk-prompt kbd {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  border: 1px solid rgba(255, 247, 234, 0.42);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffe7b3;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  padding: 5px 7px;
+}
+
+.memory-walk-controls {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+
+.memory-walk-controls button,
+.memory-walk-chapters button {
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(255, 235, 190, 0.76);
+  background: rgba(28, 17, 36, 0.82);
+  color: #fff7ea;
+  box-shadow: 0 5px 0 rgba(11, 7, 16, 0.5);
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 900;
+  backdrop-filter: blur(7px);
+  touch-action: none;
+}
+
+.memory-walk-controls button {
+  width: 48px;
+  height: 48px;
+  font-size: 1.25rem;
+}
+
+.memory-walk-controls button:active,
+.memory-walk-chapters button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 rgba(11, 7, 16, 0.5);
+}
+
+.memory-walk-chapters {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  z-index: 10;
+  display: flex;
+  gap: 6px;
+  transform: translateX(-50%);
+}
+
+.memory-walk-chapters button {
+  width: 34px;
+  height: 34px;
+  font-size: 0.72rem;
+}
+
+.memory-walk-chapters button.is-near {
+  border-color: #ffe28d;
+  background: #66404d;
+  color: #fff1b2;
+  box-shadow: 0 0 18px rgba(255, 209, 102, 0.68);
+}
+
+.memory-walk-instructions {
+  position: absolute;
+  left: 20px;
+  bottom: 24px;
+  z-index: 7;
+  max-width: 320px;
+  color: rgba(255, 243, 220, 0.84);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-shadow: 0 2px 9px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+}
+
+.world-section.has-reached-night {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(18, 15, 24, 0) 0%,
+      rgba(25, 21, 42, 0.56) 52%,
+      #171426 78%,
+      #171221 100%
+    );
+}
+
+.world-section.has-reached-night .scroll-cue {
+  color: rgba(208, 219, 255, 0.8);
+}
+
+@keyframes pathLight {
+  50% {
+    opacity: 0.55;
+    transform: translateY(-5px);
+    box-shadow: 0 0 7px #ffd166, 0 0 18px rgba(255, 209, 102, 0.52);
+  }
+}
+
+@keyframes memoryPromptIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
 }
 
 .memory-viewport {
@@ -1475,6 +1935,26 @@ label:active,
     height: 560px;
   }
 
+  .memory-walk-shell {
+    height: min(72vh, 620px);
+    min-height: 520px;
+  }
+
+  .memory-walk-hud {
+    top: 18px;
+    left: 18px;
+    right: 18px;
+  }
+
+  .memory-walk-instructions {
+    display: none;
+  }
+
+  .memory-walk-chapters {
+    left: 18px;
+    transform: none;
+  }
+
   .memory-modal {
     grid-template-columns: 1fr;
   }
@@ -1491,8 +1971,22 @@ label:active,
   .park-sun,
   .love-firefly,
   .love-firefly::before,
+  .gate-screen::before,
+  .gate-aurora,
+  .gate-particles span,
+  .gate-panel,
+  .gate-panel::before,
   .floating-letter {
     animation: none;
+  }
+
+  .memory-walk-loading span,
+  .memory-walk-prompt {
+    animation: none;
+  }
+
+  .memory-walk-progress span {
+    transition: none;
   }
 }
 
@@ -1512,5 +2006,53 @@ label:active,
 
   .modal-backdrop {
     padding: 14px;
+  }
+
+  .world-section {
+    padding-inline: 12px;
+  }
+
+  .memory-walk-shell {
+    height: 520px;
+    min-height: 0;
+    border-width: 3px;
+  }
+
+  .memory-walk-hud {
+    align-items: flex-start;
+  }
+
+  .memory-walk-progress {
+    width: 112px;
+    margin-top: 13px;
+  }
+
+  .memory-walk-prompt {
+    bottom: 78px;
+    min-width: calc(100% - 28px);
+  }
+
+  .memory-walk-prompt kbd {
+    display: none;
+  }
+
+  .memory-walk-chapters {
+    bottom: 20px;
+    gap: 4px;
+  }
+
+  .memory-walk-chapters button {
+    width: 29px;
+    height: 38px;
+  }
+
+  .memory-walk-controls {
+    right: 12px;
+    bottom: 16px;
+  }
+
+  .memory-walk-controls button {
+    width: 42px;
+    height: 42px;
   }
 }

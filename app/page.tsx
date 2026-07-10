@@ -1,15 +1,9 @@
 "use client";
 
 /* eslint-disable @next/next/no-img-element */
-import {
-  FormEvent,
-  MouseEvent as ReactMouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+
+import MemoryWalk from "./memory-walk/MemoryWalk";
 
 type Memory = {
   id: string;
@@ -18,8 +12,6 @@ type Memory = {
   date: string;
   note: string;
   image: string;
-  x: number;
-  y: number;
   palette: string;
 };
 
@@ -27,13 +19,6 @@ type Track = {
   title: string;
   artist: string;
   src: string;
-};
-
-type Direction = "front" | "back" | "left" | "right";
-
-type Point = {
-  x: number;
-  y: number;
 };
 
 const PASSCODES = ["shade50", "shadé50", "50months"];
@@ -168,8 +153,6 @@ const memories: Memory[] = [
     note:
       "A warm sky, a swing, your hand in mine, and one of those moments that still feels golden when I think about it.",
     image: "/photos/senior-sunset.jpg",
-    x: 150,
-    y: 392,
     palette: "rose",
   },
   {
@@ -180,8 +163,6 @@ const memories: Memory[] = [
     note:
       "The kind of day where everything felt new, and somehow still felt like we had been finding our way to each other forever.",
     image: "/photos/first-adventure.jpg",
-    x: 430,
-    y: 306,
     palette: "gold",
   },
   {
@@ -192,8 +173,6 @@ const memories: Memory[] = [
     note:
       "One of my favorite sounds in the world is you laughing at something we both know is ridiculous.",
     image: "/photos/favorite-laugh.jpg",
-    x: 720,
-    y: 430,
     palette: "teal",
   },
   {
@@ -204,8 +183,6 @@ const memories: Memory[] = [
     note:
       "Not every perfect memory is loud. Some are just us existing near each other and making the world feel gentle.",
     image: "/photos/quiet-day.jpg",
-    x: 1040,
-    y: 322,
     palette: "violet",
   },
   {
@@ -216,8 +193,6 @@ const memories: Memory[] = [
     note:
       "I love the way our future sounds when we talk about it together, like something bright we are building one day at a time.",
     image: "/photos/big-dreams.jpg",
-    x: 1340,
-    y: 444,
     palette: "blue",
   },
   {
@@ -228,11 +203,11 @@ const memories: Memory[] = [
     note:
       "Fifty months of loving you, learning you, missing you, laughing with you, and knowing I would choose you again.",
     image: "/photos/fifty-months.jpg",
-    x: 1630,
-    y: 330,
     palette: "peach",
   },
 ];
+
+const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
 const tracks: Track[] = [
   {
@@ -252,21 +227,11 @@ const tracks: Track[] = [
   },
 ];
 
-const STEP = 18;
-const INTERACT_RADIUS = 96;
-const WALK_SPEED = 245;
-const WORLD = { width: 1800, height: 620 };
 const fallingSprites = Array.from({ length: 28 }, (_, index) => ({
   id: index,
   type: index % 4 === 0 ? "cookie" : "heart",
 }));
-
-function clampWorldPoint(point: Point) {
-  return {
-    x: Math.min(Math.max(point.x, 34), WORLD.width - 40),
-    y: Math.min(Math.max(point.y, 350), WORLD.height - 32),
-  };
-}
+const gateParticles = Array.from({ length: 26 }, (_, index) => index);
 
 export default function Home() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -277,26 +242,13 @@ export default function Home() {
   const [selectedReason, setSelectedReason] = useState(loveReasons[0]);
   const [reasonVisible, setReasonVisible] = useState(false);
   const [foundFireflies, setFoundFireflies] = useState<number[]>([]);
-  const [player, setPlayer] = useState({ x: 58, y: 430 });
-  const [direction, setDirection] = useState<Direction>("front");
-  const [isWalking, setIsWalking] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [pathReachedNight, setPathReachedNight] = useState(false);
   const [trackIndex, setTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioStatus, setAudioStatus] = useState("Waiting for your first click.");
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const worldRef = useRef<HTMLElement | null>(null);
-  const memoryViewportRef = useRef<HTMLDivElement | null>(null);
-  const playerRef = useRef<Point>({ x: 58, y: 430 });
-  const targetRef = useRef<Point>({ x: 58, y: 430 });
-  const walkingRef = useRef(false);
-  const reasonTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
-
-  const nearestMemory = useMemo(() => {
-    return memories.find((memory) => {
-      const distance = Math.hypot(memory.x - player.x, memory.y - player.y);
-      return distance < INTERACT_RADIUS;
-    });
-  }, [player]);
+  const reasonTimeoutRef = useRef<number | null>(null);
 
   function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -325,47 +277,6 @@ export default function Home() {
     }
 
     setPasscodeError("Not quite. Try the one made for her.");
-  }
-
-  const faceTarget = useCallback((target: Point) => {
-    const current = playerRef.current;
-    const dx = target.x - current.x;
-    const dy = target.y - current.y;
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      setDirection(dx > 0 ? "right" : "left");
-      return;
-    }
-
-    setDirection(dy > 0 ? "front" : "back");
-  }, []);
-
-  const startWalkTo = useCallback((point: Point) => {
-    const target = clampWorldPoint(point);
-    targetRef.current = target;
-    faceTarget(target);
-
-    if (!walkingRef.current) {
-      walkingRef.current = true;
-      setIsWalking(true);
-    }
-  }, [faceTarget]);
-
-  const movePlayer = useCallback((dx: number, dy: number) => {
-    const base = targetRef.current;
-    startWalkTo({ x: base.x + dx, y: base.y + dy });
-  }, [startWalkTo]);
-
-  function handleWorldClick(event: ReactMouseEvent<HTMLDivElement>) {
-    if (activeMemory || letterOpen) {
-      return;
-    }
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    startWalkTo({
-      x: ((event.clientX - rect.left) / rect.width) * WORLD.width,
-      y: ((event.clientY - rect.top) / rect.height) * WORLD.height,
-    });
   }
 
   function toggleAudio() {
@@ -418,92 +329,12 @@ export default function Home() {
   }
 
   useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (!isUnlocked || activeMemory || letterOpen) {
-        return;
-      }
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotionPreference = () => setReducedMotion(mediaQuery.matches);
 
-      const key = event.key.toLowerCase();
-
-      if (["arrowup", "w"].includes(key)) {
-        event.preventDefault();
-        movePlayer(0, -STEP);
-      }
-
-      if (["arrowdown", "s"].includes(key)) {
-        event.preventDefault();
-        movePlayer(0, STEP);
-      }
-
-      if (["arrowleft", "a"].includes(key)) {
-        event.preventDefault();
-        movePlayer(-STEP, 0);
-      }
-
-      if (["arrowright", "d"].includes(key)) {
-        event.preventDefault();
-        movePlayer(STEP, 0);
-      }
-
-      if (key === "enter" && nearestMemory) {
-        event.preventDefault();
-        setActiveMemory(nearestMemory);
-      }
-    }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeMemory, isUnlocked, letterOpen, movePlayer, nearestMemory]);
-
-  useEffect(() => {
-    let animationFrame = 0;
-    let lastTime = 0;
-
-    function tick(time: number) {
-      if (!lastTime) {
-        lastTime = time;
-      }
-
-      const deltaSeconds = Math.min((time - lastTime) / 1000, 0.05);
-      lastTime = time;
-
-      const current = playerRef.current;
-      const target = targetRef.current;
-      const dx = target.x - current.x;
-      const dy = target.y - current.y;
-      const distance = Math.hypot(dx, dy);
-
-      if (distance <= 1.5) {
-        if (walkingRef.current) {
-          walkingRef.current = false;
-          setIsWalking(false);
-          playerRef.current = target;
-          setPlayer(target);
-        }
-
-        animationFrame = window.requestAnimationFrame(tick);
-        return;
-      }
-
-      const step = Math.min(distance, WALK_SPEED * deltaSeconds);
-      const next = {
-        x: current.x + (dx / distance) * step,
-        y: current.y + (dy / distance) * step,
-      };
-
-      playerRef.current = next;
-      setPlayer(next);
-
-      if (!walkingRef.current) {
-        walkingRef.current = true;
-        setIsWalking(true);
-      }
-
-      animationFrame = window.requestAnimationFrame(tick);
-    }
-
-    animationFrame = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(animationFrame);
+    updateMotionPreference();
+    mediaQuery.addEventListener("change", updateMotionPreference);
+    return () => mediaQuery.removeEventListener("change", updateMotionPreference);
   }, []);
 
   useEffect(() => {
@@ -525,27 +356,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const viewport = memoryViewportRef.current;
+    function closeOpenDialog(event: KeyboardEvent) {
+      if (event.key !== "Escape") {
+        return;
+      }
 
-    if (!viewport) {
-      return;
+      if (activeMemory) {
+        setActiveMemory(null);
+      } else if (letterOpen) {
+        setLetterOpen(false);
+      }
     }
 
-    const leftEdge = viewport.scrollLeft;
-    const rightEdge = leftEdge + viewport.clientWidth;
-    const margin = 260;
-
-    if (player.x < leftEdge + margin) {
-      viewport.scrollLeft = Math.max(0, player.x - margin);
-    }
-
-    if (player.x > rightEdge - margin) {
-      viewport.scrollLeft = Math.min(
-        WORLD.width - viewport.clientWidth,
-        player.x - viewport.clientWidth + margin,
-      );
-    }
-  }, [player.x]);
+    window.addEventListener("keydown", closeOpenDialog);
+    return () => window.removeEventListener("keydown", closeOpenDialog);
+  }, [activeMemory, letterOpen]);
 
   return (
     <>
@@ -562,6 +387,12 @@ export default function Home() {
 
       {!isUnlocked ? (
       <main className="gate-screen">
+        <div className="gate-aurora" aria-hidden="true" />
+        <div className="gate-particles" aria-hidden="true">
+          {gateParticles.map((particle) => (
+            <span key={particle} />
+          ))}
+        </div>
         <section className="gate-panel" aria-labelledby="gate-title">
           <div className="gate-kicker">For Shadé</div>
           <h1 id="gate-title">A little world for your birthday</h1>
@@ -645,80 +476,40 @@ export default function Home() {
         </button>
       </section>
 
-      <section className="world-section" ref={worldRef} aria-labelledby="world-title">
+      <section
+        className={`world-section ${pathReachedNight ? "has-reached-night" : ""}`}
+        aria-labelledby="world-title"
+      >
         <div className="section-heading">
           <p className="eyebrow">The memory path</p>
           <h2 id="world-title">A little park built from our favorite days</h2>
-          <p>Click along the path to walk · Enter near a glowing board</p>
+          <p>
+            Walk with the sunset at your back. Every glowing board holds a
+            little piece of us.
+          </p>
         </div>
 
-        <div className="memory-viewport" ref={memoryViewportRef}>
-          <div
-            className="memory-world"
-            onClick={handleWorldClick}
-            style={
-              {
-                "--player-x": `${player.x}px`,
-                "--player-y": `${player.y}px`,
-                "--world-width": `${WORLD.width}px`,
-              } as React.CSSProperties
+        <MemoryWalk
+          memories={memoryWalkMemories}
+          onOpenMemory={(memoryId) => {
+            const memory = memories.find((item) => item.id === memoryId);
+            if (memory) {
+              setActiveMemory(memory);
             }
-          >
-            <div className="world-sky" />
-            <div className="park-sun" />
-            <div className="park-moon" />
-            <div className="park-hills" />
-            <div className="park-string-lights">
-              <span />
-              <span />
-              <span />
-              <span />
-            </div>
-            <div className="park-tree tree-left" />
-            <div className="park-tree tree-middle" />
-            <div className="park-tree tree-right" />
-            <div className="park-bench" />
-            <div className="picnic-blanket" />
-            <div className="world-path" />
-            <div className="world-lights" />
-
-            {memories.map((memory, index) => (
-              <button
-                className={`memory-marker ${memory.palette}`}
-                key={memory.id}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setActiveMemory(memory);
-                }}
-                style={{ left: memory.x, top: memory.y }}
-                type="button"
-                aria-label={`Open memory: ${memory.title}`}
-              >
-                <span className="frame-art" />
-                <span className="marker-number">{index + 1}</span>
-              </button>
-            ))}
-
-            <div
-              className={`player-sprite ${direction} ${isWalking ? "is-walking" : ""}`}
-              aria-label="Shadé's pixel character"
-            />
-
-            {nearestMemory ? (
-              <button
-                className="memory-prompt"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setActiveMemory(nearestMemory);
-                }}
-                type="button"
-              >
-                Open {nearestMemory.title}
-              </button>
-            ) : null}
-          </div>
-        </div>
-        <p className="scroll-cue">The path keeps going to the right.</p>
+          }}
+          onProgressChange={(progress) => {
+            if (progress >= 0.92) {
+              setPathReachedNight(true);
+            }
+          }}
+          paused={Boolean(activeMemory || letterOpen)}
+          reducedMotion={reducedMotion}
+        />
+        <p className="scroll-cue">
+          {pathReachedNight
+            ? "The night found us. The fireflies are waiting below."
+            : "The sun keeps setting as the path carries you to the right."}
+        </p>
       </section>
 
       <section className="twilight-bridge" aria-label="Twilight transition">
@@ -795,6 +586,7 @@ export default function Home() {
               onClick={() => setLetterOpen(false)}
               aria-label="Close letter"
               type="button"
+              autoFocus
             >
               ×
             </button>
@@ -820,6 +612,7 @@ export default function Home() {
               onClick={() => setActiveMemory(null)}
               aria-label="Close memory"
               type="button"
+              autoFocus
             >
               ×
             </button>
