@@ -11,6 +11,17 @@ const expectedMemoryIds = [
   "fifty-months",
 ];
 
+const propSprites = [
+  "board",
+  "swing",
+  "picnic",
+  "garden",
+  "bench",
+  "lamppost",
+  "stargazing",
+  "flower-tuft",
+];
+
 test("maps every React memory to one Tiled scene stop", async () => {
   const map = JSON.parse(
     await readFile(
@@ -51,10 +62,13 @@ test("keeps the React-Phaser bridge keyboard and touch accessible", async () => 
   assert.match(component, /onPointerDown/);
   assert.match(scene, /maxProgress = Math\.max/);
   assert.match(scene, /Phaser\.AUTO/);
+  propSprites.forEach((sprite) => {
+    assert.match(scene, new RegExp(`/props/${sprite}\\.webp`));
+  });
 });
 
 test("ships the cinematic scene under the ten megabyte asset budget", async () => {
-  const [panorama, socialCard] = await Promise.all([
+  const [panorama, socialCard, ...props] = await Promise.all([
     stat(
       new URL(
         "../public/assets/memory-walk/park-panorama.webp",
@@ -62,8 +76,19 @@ test("ships the cinematic scene under the ten megabyte asset budget", async () =
       ),
     ),
     stat(new URL("../public/og.png", import.meta.url)),
+    ...propSprites.map((sprite) =>
+      stat(
+        new URL(
+          `../public/assets/memory-walk/props/${sprite}.webp`,
+          import.meta.url,
+        ),
+      ),
+    ),
   ]);
 
   assert.ok(panorama.size < 10 * 1024 * 1024);
+  assert.ok(
+    props.reduce((total, prop) => total + prop.size, 0) < 4 * 1024 * 1024,
+  );
   assert.ok(socialCard.size > 0);
 });

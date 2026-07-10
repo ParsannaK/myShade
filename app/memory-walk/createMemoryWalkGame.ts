@@ -39,7 +39,7 @@ type TiledMap = {
 
 type Board = {
   container: Phaser.GameObjects.Container;
-  glow: Phaser.GameObjects.Rectangle;
+  glow: Phaser.GameObjects.Image;
   id: string;
   x: number;
 };
@@ -98,6 +98,20 @@ class MemoryPathScene extends Phaser.Scene {
     this.load.image("shade-side-idle", "/assets/shade/side-idle.png");
     this.load.image("shade-right-1", "/assets/shade/right-1.png");
     this.load.image("shade-right-2", "/assets/shade/right-2.png");
+    this.load.image("memory-board", "/assets/memory-walk/props/board.webp");
+    this.load.image("prop-swing", "/assets/memory-walk/props/swing.webp");
+    this.load.image("prop-picnic", "/assets/memory-walk/props/picnic.webp");
+    this.load.image("prop-garden", "/assets/memory-walk/props/garden.webp");
+    this.load.image("prop-bench", "/assets/memory-walk/props/bench.webp");
+    this.load.image("prop-lamppost", "/assets/memory-walk/props/lamppost.webp");
+    this.load.image(
+      "prop-stargazing",
+      "/assets/memory-walk/props/stargazing.webp",
+    );
+    this.load.image(
+      "prop-flower-tuft",
+      "/assets/memory-walk/props/flower-tuft.webp",
+    );
     this.load.json(
       "memory-path-map",
       "/assets/memory-walk/memory-path.tmj",
@@ -298,8 +312,8 @@ class MemoryPathScene extends Phaser.Scene {
     this.boards.forEach((board) => {
       const distance = Math.abs(board.x - this.player.x);
       const isNear = distance < INTERACT_DISTANCE;
-      board.glow.setAlpha(isNear ? 0.88 : 0.2 + this.maxProgress * 0.12);
-      board.container.setScale(isNear && !this.reducedMotion ? 1.04 : 1);
+      board.glow.setAlpha(isNear ? 0.2 : 0.035 + this.maxProgress * 0.015);
+      board.container.setScale(isNear && !this.reducedMotion ? 1.025 : 1);
 
       if (distance < nearestDistance) {
         nearest = board;
@@ -333,45 +347,34 @@ class MemoryPathScene extends Phaser.Scene {
       const x = object.x;
       const y = pathY(x) + 2;
       const glow = this.add
-        .rectangle(x, y - 89, 132, 156, 0xffd47a, 0.2)
+        .image(x, y + 6, "memory-board")
+        .setOrigin(0.5, 1)
+        .setDisplaySize(144, 216)
+        .setTintFill(0xffd47a)
+        .setAlpha(0.035)
         .setBlendMode(Phaser.BlendModes.ADD)
         .setDepth(28);
       const container = this.add.container(x, y).setDepth(32);
-      const graphics = this.add.graphics();
+      const boardSprite = this.add
+        .image(0, 6, "memory-board")
+        .setOrigin(0.5, 1)
+        .setDisplaySize(132, 198);
 
-      graphics.fillStyle(0x2a1527, 0.42);
-      graphics.fillRect(-43, -126, 92, 112);
-      graphics.fillStyle(0x5b2f2b, 1);
-      graphics.fillRect(-39, -130, 78, 104);
-      graphics.fillStyle(0x9b5940, 1);
-      graphics.fillRect(-32, -122, 64, 88);
-      graphics.fillStyle(0x3d2030, 1);
-      graphics.fillRect(-26, -116, 52, 76);
-      graphics.fillStyle(0xffefd1, 1);
-      graphics.fillRect(-19, -91, 38, 42);
-      graphics.fillStyle(0x6b3a2d, 1);
-      graphics.fillRect(-30, -26, 13, 35);
-      graphics.fillRect(17, -26, 13, 35);
-      graphics.fillStyle(0xffd166, 1);
-      graphics.fillRect(-23, -111, 7, 7);
+      this.add
+        .ellipse(x, y + 1, 94, 14, 0x160d1b, 0.3)
+        .setDepth(27);
 
       const number = this.add
-        .text(0, -70, `${index + 1}`, {
-          color: "#2b1b2f",
+        .text(0, -105, `${index + 1}`, {
+          color: "#3a2031",
           fontFamily: "monospace",
-          fontSize: "20px",
+          fontSize: "19px",
           fontStyle: "bold",
         })
-        .setOrigin(0.5);
-      const heart = this.add
-        .text(0, -106, "♥", {
-          color: "#ffd166",
-          fontFamily: "serif",
-          fontSize: "15px",
-        })
-        .setOrigin(0.5);
+        .setOrigin(0.5)
+        .setShadow(0, 1, "rgba(84, 44, 35, 0.22)", 0, false, true);
 
-      container.add([graphics, number, heart]);
+      container.add([boardSprite, number]);
       this.boards.push({ container, glow, id: memoryId, x });
     });
   }
@@ -421,88 +424,64 @@ class MemoryPathScene extends Phaser.Scene {
     this.drawLanternGrove(2420, pathY(2420));
     this.drawOverlook(3060, pathY(3060));
 
-    for (let x = 110; x < WORLD_WIDTH; x += 118) {
-      const plant = this.add.graphics({ x, y: pathY(x) + 2 });
-      const nightSide = x / WORLD_WIDTH;
-      plant.fillStyle(nightSide > 0.58 ? 0x1a3a39 : 0x5b4933, 0.94);
-      plant.fillRect(-2, -22 - (x % 13), 4, 25 + (x % 13));
-      plant.fillRect(-9, -15, 8, 4);
-      plant.fillRect(2, -10, 9, 4);
-      plant.fillStyle(x % 3 === 0 ? 0xf5b46c : 0x8c7bd8, 0.92);
-      plant.fillRect(-5, -29 - (x % 13), 7, 7);
-      plant.setDepth(60);
+    for (let x = 130; x < WORLD_WIDTH; x += 178) {
+      const width = 42 + ((x / 178) % 3) * 7;
+      const plant = this.addGroundedProp(
+        "prop-flower-tuft",
+        x,
+        pathY(x) + 5,
+        width,
+        60,
+        0.16,
+      );
+      plant.setFlipX(Math.floor(x / 178) % 2 === 0);
+      if (x > 2300) {
+        plant.setTint(0x8292bd);
+      } else if (x > 1250) {
+        plant.setTint(0xc29cb6);
+      }
     }
   }
 
   private drawSwing(x: number, y: number) {
-    const art = this.add.graphics({ x, y }).setDepth(18);
-    art.lineStyle(9, 0x4b2842, 1);
-    art.beginPath();
-    art.moveTo(-98, 4);
-    art.lineTo(-62, -180);
-    art.lineTo(62, -180);
-    art.lineTo(98, 4);
-    art.strokePath();
-    art.lineStyle(3, 0xf2bc79, 0.7);
-    art.lineBetween(-38, -172, -30, -44);
-    art.lineBetween(38, -172, 30, -44);
-    art.fillStyle(0x67392f, 1);
-    art.fillRect(-46, -47, 92, 13);
+    this.addGroundedProp("prop-swing", x, y + 3, 276, 18, 0.28);
   }
 
   private drawPicnic(x: number, y: number) {
-    const art = this.add.graphics({ x, y }).setDepth(24);
-    art.fillStyle(0x281d2e, 0.25);
-    art.fillEllipse(0, -4, 150, 28);
-    art.fillStyle(0xb95166, 1);
-    art.fillRect(-66, -30, 132, 48);
-    art.fillStyle(0xffd991, 0.9);
-    for (let stripe = -60; stripe <= 54; stripe += 24) {
-      art.fillRect(stripe, -30, 10, 48);
-    }
-    art.fillStyle(0xb16c3f, 1);
-    art.fillCircle(-20, -38, 12);
-    art.fillCircle(8, -42, 10);
+    this.addGroundedProp("prop-picnic", x, y + 9, 214, 24, 0.24);
   }
 
   private drawGarden(x: number, y: number) {
-    const art = this.add.graphics({ x, y }).setDepth(26);
-    const colors = [0xf4a1a8, 0xffd166, 0x9f85d8, 0x74c6aa];
-    for (let index = 0; index < 32; index += 1) {
-      const flowerX = -120 + ((index * 43) % 240);
-      const flowerY = -12 - ((index * 29) % 72);
-      art.fillStyle(0x34563f, 0.9);
-      art.fillRect(flowerX, flowerY, 3, Math.abs(flowerY));
-      art.fillStyle(colors[index % colors.length], 1);
-      art.fillRect(flowerX - 3, flowerY - 5, 8, 8);
-    }
+    this.addGroundedProp("prop-garden", x, y + 5, 314, 26, 0.2);
   }
 
   private drawBench(x: number, y: number) {
-    const art = this.add.graphics({ x, y }).setDepth(24);
-    art.fillStyle(0x332037, 0.34);
-    art.fillRect(-88, -5, 176, 16);
-    art.fillStyle(0x6b3b35, 1);
-    art.fillRect(-78, -72, 156, 18);
-    art.fillRect(-78, -47, 156, 17);
-    art.fillRect(-72, -25, 144, 13);
-    art.fillStyle(0x3d2933, 1);
-    art.fillRect(-63, -13, 12, 40);
-    art.fillRect(51, -13, 12, 40);
+    this.addGroundedProp("prop-bench", x, y + 4, 230, 24, 0.27);
   }
 
   private drawLanternGrove(x: number, y: number) {
     for (let index = 0; index < 5; index += 1) {
       const lampX = x - 150 + index * 74;
-      const lampHeight = 104 + (index % 2) * 24;
-      const art = this.add.graphics({ x: lampX, y }).setDepth(22);
-      art.fillStyle(0x26223a, 1);
-      art.fillRect(-4, -lampHeight, 8, lampHeight + 10);
-      art.fillRect(-13, -lampHeight, 26, 6);
-      art.fillStyle(0xffdc89, 1);
-      art.fillRect(-9, -lampHeight - 23, 18, 23);
+      const lampWidth = 82 + (index % 2) * 8;
+      const lamp = this.addGroundedProp(
+        "prop-lamppost",
+        lampX,
+        y + 4,
+        lampWidth,
+        22,
+        0.16,
+      );
+      if (index % 2 === 1) {
+        lamp.setFlipX(true);
+      }
       const glow = this.add
-        .circle(lampX, y - lampHeight - 12, 46, 0xffd166, 0)
+        .circle(
+          lampX + (index % 2 === 1 ? -13 : 13),
+          y - lamp.displayHeight * 0.73,
+          50,
+          0xffd166,
+          0,
+        )
         .setBlendMode(Phaser.BlendModes.ADD)
         .setDepth(21);
       this.lanternGlows.push(glow);
@@ -510,18 +489,28 @@ class MemoryPathScene extends Phaser.Scene {
   }
 
   private drawOverlook(x: number, y: number) {
-    const art = this.add.graphics({ x, y }).setDepth(24);
-    art.fillStyle(0x2d1d38, 0.42);
-    art.fillEllipse(0, 2, 244, 30);
-    art.fillStyle(0x4f3150, 1);
-    art.fillRect(-110, -8, 220, 12);
-    art.fillStyle(0x283557, 1);
-    art.fillRect(-78, -30, 156, 30);
-    art.lineStyle(6, 0x35253f, 1);
-    art.lineBetween(64, -22, 101, -106);
-    art.lineBetween(78, -62, 122, -52);
-    art.fillStyle(0xd3c9ff, 1);
-    art.fillCircle(125, -52, 9);
+    this.addGroundedProp("prop-stargazing", x, y + 5, 252, 24, 0.24);
+  }
+
+  private addGroundedProp(
+    texture: string,
+    x: number,
+    y: number,
+    width: number,
+    depth: number,
+    shadowAlpha: number,
+  ) {
+    const shadow = this.add
+      .ellipse(x, y + 1, width * 0.68, Math.max(10, width * 0.055), 0x130c19, shadowAlpha)
+      .setDepth(depth - 1);
+    shadow.setScale(1, 0.72);
+
+    const image = this.add
+      .image(x, y, texture)
+      .setOrigin(0.5, 1)
+      .setDepth(depth);
+    image.setDisplaySize(width, width * (image.height / image.width));
+    return image;
   }
 
   private createFireflies() {
