@@ -69,6 +69,7 @@ class MemoryPathScene extends Phaser.Scene {
   private memories: MemoryWalkMemory[];
   private reducedMotion: boolean;
   private boards: Board[] = [];
+  private ambientTweens: Phaser.Tweens.Tween[] = [];
   private lanternGlows: Phaser.GameObjects.Arc[] = [];
   private player!: Phaser.GameObjects.Sprite;
   private nightWash!: Phaser.GameObjects.Rectangle;
@@ -100,7 +101,6 @@ class MemoryPathScene extends Phaser.Scene {
     this.load.image("shade-right-2", "/assets/shade/right-2.png");
     this.load.image("memory-board", "/assets/memory-walk/props/board.webp");
     this.load.image("prop-swing", "/assets/memory-walk/props/swing.webp");
-    this.load.image("prop-picnic", "/assets/memory-walk/props/picnic.webp");
     this.load.image("prop-garden", "/assets/memory-walk/props/garden.webp");
     this.load.image("prop-bench", "/assets/memory-walk/props/bench.webp");
     this.load.image("prop-lamppost", "/assets/memory-walk/props/lamppost.webp");
@@ -130,7 +130,7 @@ class MemoryPathScene extends Phaser.Scene {
     this.drawAtmosphere();
     this.drawLandmarks();
     this.createBoards();
-    this.createFireflies();
+    this.createAmbientParticles();
 
     this.player = this.add
       .sprite(START_X, pathY(START_X), "shade-side-idle")
@@ -238,6 +238,13 @@ class MemoryPathScene extends Phaser.Scene {
 
   setReducedMotion(reducedMotion: boolean) {
     this.reducedMotion = reducedMotion;
+    this.ambientTweens.forEach((tween) => {
+      if (reducedMotion) {
+        tween.pause();
+      } else {
+        tween.resume();
+      }
+    });
     if (this.player) {
       this.cameras.main.setLerp(
         reducedMotion ? 1 : 0.075,
@@ -418,7 +425,6 @@ class MemoryPathScene extends Phaser.Scene {
 
   private drawLandmarks() {
     this.drawSwing(300, pathY(300));
-    this.drawPicnic(800, pathY(800));
     this.drawGarden(1330, pathY(1330));
     this.drawBench(1880, pathY(1880));
     this.drawLanternGrove(2420, pathY(2420));
@@ -445,10 +451,6 @@ class MemoryPathScene extends Phaser.Scene {
 
   private drawSwing(x: number, y: number) {
     this.addGroundedProp("prop-swing", x, y + 3, 276, 18, 0.28);
-  }
-
-  private drawPicnic(x: number, y: number) {
-    this.addGroundedProp("prop-picnic", x, y + 9, 214, 24, 0.24);
   }
 
   private drawGarden(x: number, y: number) {
@@ -513,26 +515,75 @@ class MemoryPathScene extends Phaser.Scene {
     return image;
   }
 
-  private createFireflies() {
-    for (let index = 0; index < 34; index += 1) {
-      const x = 1840 + ((index * 137) % 1640);
-      const y = 310 + ((index * 71) % 236);
-      const firefly = this.add
-        .rectangle(x, y, index % 5 === 0 ? 5 : 3, index % 5 === 0 ? 5 : 3, 0xffe18a, 0.18)
+  private createAmbientParticles() {
+    const moteColors = [0xffd27c, 0xffa66d, 0xd9b6ff, 0xa9c8ff];
+
+    for (let index = 0; index < 58; index += 1) {
+      const x = 70 + ((index * 263) % (WORLD_WIDTH - 140));
+      const y = 205 + ((index * 109) % 342);
+      const worldProgress = x / WORLD_WIDTH;
+      const paletteIndex = Math.min(
+        moteColors.length - 1,
+        Math.floor(worldProgress * moteColors.length),
+      );
+      const size = index % 9 === 0 ? 4 : index % 3 === 0 ? 3 : 2;
+      const mote = this.add
+        .rectangle(
+          x,
+          y,
+          size,
+          size,
+          moteColors[paletteIndex],
+          0.18 + (index % 4) * 0.045,
+        )
+        .setAngle(index % 5 === 0 ? 45 : 0)
         .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(44);
+        .setDepth(index % 6 === 0 ? 57 : 43);
+
       if (!this.reducedMotion) {
-        this.tweens.add({
-          targets: firefly,
-          alpha: 0.9,
-          x: x + 10 - (index % 3) * 10,
-          y: y - 12 - (index % 4) * 4,
-          duration: 1500 + (index % 6) * 280,
+        const tween = this.tweens.add({
+          targets: mote,
+          alpha: 0.58 + (index % 3) * 0.1,
+          x: x + 12 - (index % 4) * 8,
+          y: y - 18 - (index % 5) * 6,
+          angle: mote.angle + (index % 2 === 0 ? 35 : -35),
+          duration: 2500 + (index % 7) * 420,
           yoyo: true,
           repeat: -1,
-          delay: index * 83,
+          delay: index * 91,
           ease: "Sine.easeInOut",
         });
+        this.ambientTweens.push(tween);
+      }
+    }
+
+    for (let index = 0; index < 30; index += 1) {
+      const x = 1760 + ((index * 149) % 1650);
+      const y = 300 + ((index * 73) % 252);
+      const halo = this.add
+        .rectangle(0, 0, index % 6 === 0 ? 9 : 7, index % 6 === 0 ? 9 : 7, 0xffd978, 0.16)
+        .setBlendMode(Phaser.BlendModes.ADD);
+      const core = this.add
+        .rectangle(0, 0, index % 6 === 0 ? 3 : 2, index % 6 === 0 ? 3 : 2, 0xffffcf, 0.88)
+        .setBlendMode(Phaser.BlendModes.ADD);
+      const firefly = this.add
+        .container(x, y, [halo, core])
+        .setAlpha(0.28 + (index % 4) * 0.08)
+        .setDepth(index % 5 === 0 ? 58 : 45);
+
+      if (!this.reducedMotion) {
+        const tween = this.tweens.add({
+          targets: firefly,
+          alpha: 1,
+          x: x + 14 - (index % 4) * 9,
+          y: y - 14 - (index % 5) * 5,
+          duration: 1450 + (index % 6) * 310,
+          yoyo: true,
+          repeat: -1,
+          delay: index * 117,
+          ease: "Sine.easeInOut",
+        });
+        this.ambientTweens.push(tween);
       }
     }
   }

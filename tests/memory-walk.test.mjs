@@ -14,7 +14,6 @@ const expectedMemoryIds = [
 const propSprites = [
   "board",
   "swing",
-  "picnic",
   "garden",
   "bench",
   "lamppost",
@@ -62,6 +61,8 @@ test("keeps the React-Phaser bridge keyboard and touch accessible", async () => 
   assert.match(component, /onPointerDown/);
   assert.match(scene, /maxProgress = Math\.max/);
   assert.match(scene, /Phaser\.AUTO/);
+  assert.match(scene, /createAmbientParticles/);
+  assert.match(scene, /ambientTweens/);
   propSprites.forEach((sprite) => {
     assert.match(scene, new RegExp(`/props/${sprite}\\.webp`));
   });
