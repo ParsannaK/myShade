@@ -1045,17 +1045,17 @@ label:active,
 
 .bridge-copy p {
   max-width: 720px;
-  color: #ffe8c6;
+  color: rgba(255, 232, 198, 0.66);
   font-size: clamp(1.35rem, 3vw, 2.8rem);
   line-height: 1.25;
   margin: 0;
   text-align: center;
-  text-shadow: 0 12px 36px rgba(0, 0, 0, 0.48);
+  text-shadow: 0 12px 36px rgba(0, 0, 0, 0.34);
 }
 
 .firefly-field {
   position: absolute;
-  inset: clamp(16px, 4vw, 54px) clamp(12px, 3vw, 42px);
+  inset: clamp(6px, 1.8vw, 24px) clamp(4px, 1.4vw, 18px);
   z-index: 3;
 }
 
@@ -1068,8 +1068,7 @@ label:active,
   border: 0;
   background: transparent;
   transform: translate(-50%, -50%);
-  animation: fireflyDrift 5.2s ease-in-out infinite;
-  animation-delay: var(--firefly-delay);
+  animation: fireflyFormation 26s ease-in-out infinite;
   cursor: var(--heart-cursor);
 }
 
@@ -1084,6 +1083,8 @@ label:active,
   box-shadow:
     0 0 10px rgba(255, 209, 102, 0.86),
     0 0 24px rgba(255, 209, 102, 0.36);
+  animation: fireflyGlow 2.6s steps(2) infinite;
+  animation-delay: var(--firefly-delay);
 }
 
 .love-firefly::after {
@@ -1102,6 +1103,18 @@ label:active,
   box-shadow:
     0 0 0 5px rgba(255, 209, 102, 0.18),
     0 0 28px rgba(255, 209, 102, 0.92);
+}
+
+.love-firefly.is-found::before {
+  background: #0b1f4d;
+  box-shadow:
+    0 0 0 2px rgba(255, 209, 102, 0.78),
+    0 0 16px rgba(119, 169, 255, 0.48),
+    0 0 28px rgba(11, 31, 77, 0.72);
+}
+
+.love-firefly.is-found::after {
+  background: #77a9ff;
 }
 
 .love-firefly:focus-visible {
@@ -1161,19 +1174,50 @@ label:active,
   line-height: 1.55;
 }
 
-@keyframes fireflyDrift {
+@keyframes fireflyFormation {
   0%,
   100% {
-    opacity: 0.72;
+    left: var(--firefly-left);
+    top: var(--firefly-top);
     transform: translate(-50%, -50%);
   }
-  45% {
-    opacity: 1;
+
+  12% {
+    left: var(--firefly-left);
+    top: var(--firefly-top);
     transform: translate(calc(-50% + var(--firefly-drift)), calc(-50% - 14px));
   }
-  70% {
+
+  24%,
+  40% {
+    left: var(--name-left);
+    top: var(--name-top);
+    transform: translate(-50%, -50%);
+  }
+
+  52% {
+    left: var(--name-left);
+    top: var(--name-top);
+    transform: translate(calc(-50% - 4px), calc(-50% + 5px));
+  }
+
+  64%,
+  80% {
+    left: var(--heart-left);
+    top: var(--heart-top);
+    transform: translate(-50%, -50%);
+  }
+
+  91% {
+    left: var(--firefly-left);
+    top: var(--firefly-top);
+    transform: translate(calc(-50% - 12px), calc(-50% + 10px));
+  }
+}
+
+@keyframes fireflyGlow {
+  50% {
     opacity: 0.52;
-    transform: translate(calc(-50% - 10px), calc(-50% + 8px));
   }
 }
 
@@ -1446,6 +1490,7 @@ label:active,
   .park-string-lights span,
   .park-sun,
   .love-firefly,
+  .love-firefly::before,
   .floating-letter {
     animation: none;
   }

@@ -99,11 +99,59 @@ const loveReasons = [
   "Because after fifty months, I still know I would choose you again.",
 ];
 
+function buildNameFormation() {
+  return [
+    { x: 12, y: 30 }, { x: 16, y: 30 }, { x: 20, y: 30 },
+    { x: 12, y: 42 }, { x: 16, y: 50 }, { x: 20, y: 58 },
+    { x: 12, y: 70 }, { x: 16, y: 70 }, { x: 20, y: 70 },
+    { x: 27, y: 30 }, { x: 27, y: 42 }, { x: 27, y: 54 },
+    { x: 35, y: 54 }, { x: 35, y: 42 }, { x: 35, y: 30 },
+    { x: 27, y: 70 }, { x: 35, y: 70 },
+    { x: 42, y: 70 }, { x: 45, y: 54 }, { x: 48, y: 38 },
+    { x: 51, y: 54 }, { x: 54, y: 70 }, { x: 45, y: 56 },
+    { x: 51, y: 56 },
+    { x: 60, y: 30 }, { x: 60, y: 42 }, { x: 60, y: 54 },
+    { x: 60, y: 66 }, { x: 64, y: 30 }, { x: 68, y: 34 },
+    { x: 70, y: 44 }, { x: 70, y: 56 }, { x: 68, y: 66 },
+    { x: 64, y: 70 },
+    { x: 77, y: 30 }, { x: 81, y: 30 }, { x: 85, y: 30 },
+    { x: 77, y: 42 }, { x: 77, y: 54 }, { x: 81, y: 54 },
+    { x: 85, y: 54 }, { x: 77, y: 66 }, { x: 77, y: 70 },
+    { x: 81, y: 70 }, { x: 85, y: 70 },
+    { x: 80, y: 21 }, { x: 82.5, y: 18 }, { x: 85, y: 15 },
+    { x: 88, y: 30 }, { x: 88, y: 70 },
+  ];
+}
+
+function buildHeartFormation() {
+  return loveReasons.map((_, index) => {
+    const angle = (Math.PI * 2 * index) / loveReasons.length;
+    const x = 16 * Math.sin(angle) ** 3;
+    const y =
+      13 * Math.cos(angle) -
+      5 * Math.cos(2 * angle) -
+      2 * Math.cos(3 * angle) -
+      Math.cos(4 * angle);
+
+    return {
+      x: 50 + x * 1.95,
+      y: 55 - y * 2.12,
+    };
+  });
+}
+
+const nameFormation = buildNameFormation();
+const heartFormation = buildHeartFormation();
+
 const fireflies = loveReasons.map((reason, index) => ({
   id: index + 1,
   reason,
   left: 7 + ((index * 19) % 86),
   top: 8 + ((index * 31) % 84),
+  nameLeft: nameFormation[index].x,
+  nameTop: nameFormation[index].y,
+  heartLeft: heartFormation[index].x,
+  heartTop: heartFormation[index].y,
   delay: -((index * 0.37) % 6),
   drift: 24 + ((index * 7) % 38),
 }));
@@ -228,6 +276,7 @@ export default function Home() {
   const [activeMemory, setActiveMemory] = useState<Memory | null>(null);
   const [selectedReason, setSelectedReason] = useState(loveReasons[0]);
   const [reasonVisible, setReasonVisible] = useState(false);
+  const [foundFireflies, setFoundFireflies] = useState<number[]>([]);
   const [player, setPlayer] = useState({ x: 58, y: 430 });
   const [direction, setDirection] = useState<Direction>("front");
   const [isWalking, setIsWalking] = useState(false);
@@ -351,7 +400,10 @@ export default function Home() {
     setAudioStatus("Ready.");
   }
 
-  function revealReason(reason: string) {
+  function revealReason(id: number, reason: string) {
+    setFoundFireflies((current) => (
+      current.includes(id) ? current : [...current, id]
+    ));
     setSelectedReason(reason);
     setReasonVisible(true);
 
@@ -673,19 +725,27 @@ export default function Home() {
         <div className="firefly-field" aria-label="Fifty reasons I love you">
           {fireflies.map((firefly) => (
             <button
-              className="love-firefly"
+              className={`love-firefly ${
+                foundFireflies.includes(firefly.id) ? "is-found" : ""
+              }`}
               key={firefly.id}
-              onClick={() => revealReason(firefly.reason)}
+              onClick={() => revealReason(firefly.id, firefly.reason)}
               style={
                 {
                   "--firefly-left": `${firefly.left}%`,
                   "--firefly-top": `${firefly.top}%`,
+                  "--name-left": `${firefly.nameLeft}%`,
+                  "--name-top": `${firefly.nameTop}%`,
+                  "--heart-left": `${firefly.heartLeft}%`,
+                  "--heart-top": `${firefly.heartTop}%`,
                   "--firefly-delay": `${firefly.delay}s`,
                   "--firefly-drift": `${firefly.drift}px`,
                 } as React.CSSProperties
               }
               type="button"
-              aria-label={`Reason ${firefly.id}: ${firefly.reason}`}
+              aria-label={`Reason ${firefly.id}: ${firefly.reason}${
+                foundFireflies.includes(firefly.id) ? " Already found." : ""
+              }`}
             />
           ))}
         </div>
