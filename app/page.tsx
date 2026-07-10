@@ -418,7 +418,7 @@ export default function Home() {
         </div>
         <section className="gate-panel" aria-labelledby="gate-title">
           <div className="gate-kicker">For Shadé</div>
-          <h1 id="gate-title">Let's enter our little world</h1>
+          <h1 id="gate-title">Let&apos;s enter our little world</h1>
           <p>
             From the day we met, I have been building a world for us in my heart, and I want to share it with you, my Shadé.
           </p>

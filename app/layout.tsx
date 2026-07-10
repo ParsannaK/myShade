@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,41 +15,29 @@ const geistMono = Geist_Mono({
 const title = "For Shadé";
 const description =
   "A romantic pixel-art birthday memory world celebrating fifty months together.";
+const metadataBase = new URL("https://shadesanna.com");
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ??
-    requestHeaders.get("host") ??
-    "localhost:3000";
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
-  const metadataBase = new URL(`${protocol}://${host}`);
-  const socialImage = new URL("/og.png", metadataBase).toString();
-
-  return {
-    metadataBase,
+export const metadata: Metadata = {
+  metadataBase,
+  title,
+  description,
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
+  openGraph: {
     title,
     description,
-    icons: {
-      icon: "/favicon.svg",
-      shortcut: "/favicon.svg",
-    },
-    openGraph: {
-      title,
-      description,
-      images: [{ url: socialImage, width: 1733, height: 907 }],
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: [socialImage],
-    },
-  };
-}
+    images: [{ url: "/og.png", width: 1733, height: 907 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/og.png"],
+  },
+};
 
 export default function RootLayout({
   children,

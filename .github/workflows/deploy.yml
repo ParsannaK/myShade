@@ -32,15 +32,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # 1. This runs your template's specific production build script
-      - name: Build project
-        run: npm run build
+      - name: Build static site
+        run: npx next build
 
-      # 2. This targets your project's custom static build folder instead of './out'
+      - name: Add custom domain
+        run: cp CNAME out/CNAME
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./.vinext/client
+          path: ./out
 
   deploy:
     environment:
