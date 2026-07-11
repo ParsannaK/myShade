@@ -3,12 +3,12 @@ import { readFile, stat } from "node:fs/promises";
 import test from "node:test";
 
 const expectedMemoryIds = [
-  "senior-sunset",
-  "first-adventure",
-  "favorite-laugh",
-  "quiet-day",
-  "big-dreams",
-  "fifty-months",
+  "first-time-we-showed-up",
+  "loving-across-the-distance",
+  "making-a-home-wherever-we-were",
+  "crossing-the-distance",
+  "ordinary-days-extraordinary-love",
+  "the-life-we-kept-choosing",
 ];
 
 const propSprites = [

@@ -30,30 +30,44 @@ test("server-renders the birthday experience shell", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>For Shadé<\/title>/i);
-  assert.match(html, /Let's enter our little world/);
+  assert.match(html, /Let(?:'|&#x27;)s enter our little world/);
   assert.match(html, /For Shadé/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 
 test("keeps birthday content and assets wired in", async () => {
-  const [page, layout, packageJson] = await Promise.all([
+  const [page, memoryContent, layout, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(
+      new URL("../app/memory-walk/memoryContent.ts", import.meta.url),
+      "utf8",
+    ),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
     access(new URL("../public/assets/senior-sunset-swing.png", import.meta.url)),
     access(new URL("../public/assets/shadeSannaStargazing.png", import.meta.url)),
     access(new URL("../public/assets/shade/front.png", import.meta.url)),
     access(new URL("../public/assets/shade/right-1.png", import.meta.url)),
+    ...Array.from({ length: 6 }, (_, index) =>
+      access(
+        new URL(
+          `../public/assets/memory-walk/memory${index + 1}.jpeg`,
+          import.meta.url,
+        ),
+      ),
+    ),
     access(new URL("../public/photos/README.md", import.meta.url)),
     access(new URL("../public/audio/README.md", import.meta.url)),
   ]);
 
   assert.match(page, /PASSCODES/);
   assert.match(page, /birthdayLetter/);
-  assert.match(page, /const memories: Memory\[\]/);
+  assert.match(page, /memoryEpilogue/);
   assert.match(page, /const tracks: Track\[\]/);
-  assert.match(page, /Senior Sunset/);
-  assert.match(page, /Fifty Months/);
+  assert.match(memoryContent, /The First Time We Showed Up/);
+  assert.match(memoryContent, /The Life We Kept Choosing/);
+  assert.match(memoryContent, /These memories are not proof/);
+  assert.match(memoryContent, /date: "Add date"/);
   assert.match(layout, /romantic pixel-art birthday memory world/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });

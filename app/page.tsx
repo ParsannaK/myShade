@@ -4,16 +4,8 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 import MemoryWalk from "./memory-walk/MemoryWalk";
-
-type Memory = {
-  id: string;
-  title: string;
-  place: string;
-  date: string;
-  note: string;
-  image: string;
-  palette: string;
-};
+import { memories, memoryEpilogue } from "./memory-walk/memoryContent";
+import type { StoryMemory as Memory } from "./memory-walk/memoryContent";
 
 type Track = {
   title: string;
@@ -144,69 +136,6 @@ const fireflies = loveReasons.map((reason, index) => ({
 
 const starQuote =
   "Of all the stars I could have wished on, I am most grateful for the one that led me to you.";
-
-const memories: Memory[] = [
-  {
-    id: "senior-sunset",
-    title: "First memory",
-    place: "location",
-    date: "date",
-    note:
-      "note",
-    image: "/photos/senior-sunset.jpg",
-    palette: "rose",
-  },
-  {
-    id: "first-adventure",
-    title: "second memory",
-    place: "location",
-    date: "date",
-    note:
-      "note",
-    image: "/photos/first-adventure.jpg",
-    palette: "gold",
-  },
-  {
-    id: "favorite-laugh",
-    title: "third memory",
-    place: "location",
-    date: "date",
-    note:
-      "note",
-    image: "/photos/favorite-laugh.jpg",
-    palette: "teal",
-  },
-  {
-    id: "quiet-day",
-    title: "fourth memory",
-    place: "location",
-    date: "date",
-    note:
-      "note",
-    image: "/photos/quiet-day.jpg",
-    palette: "violet",
-  },
-  {
-    id: "big-dreams",
-    title: "fifth memory",
-    place: "location",
-    date: "date",
-    note:
-      "note",
-    image: "/photos/big-dreams.jpg",
-    palette: "blue",
-  },
-  {
-    id: "fifty-months",
-    title: "sixth memory",
-    place: "location",
-    date: "date",
-    note:
-      "note",
-    image: "/photos/fifty-months.jpg",
-    palette: "peach",
-  },
-];
 
 const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
@@ -535,6 +464,14 @@ export default function Home() {
         </p>
       </section>
 
+      <section className="memory-coda" aria-labelledby="memory-coda-title">
+        <div className="memory-coda-card">
+          <p className="eyebrow">After the path</p>
+          <h2 id="memory-coda-title">What we built could carry us.</h2>
+          <p>{memoryEpilogue}</p>
+        </div>
+      </section>
+
       <section className="twilight-bridge" aria-label="Twilight transition">
         <div className="firefly-field" aria-label="Fifty reasons I love you">
           {fireflies.map((firefly) => (
@@ -642,18 +579,22 @@ export default function Home() {
             <div className={`memory-photo ${activeMemory.palette}`}>
               <img
                 src={activeMemory.image}
-                alt={`${activeMemory.title} memory photo placeholder`}
+                alt={activeMemory.alt}
+                style={{ objectPosition: activeMemory.focus }}
                 onError={(event) => {
                   event.currentTarget.style.display = "none";
                 }}
               />
-              <span>I will put photo here</span>
             </div>
             <div className="memory-copy">
               <p className="eyebrow">{activeMemory.date}</p>
               <h2 id="memory-title">{activeMemory.title}</h2>
-              <p className="place">{activeMemory.place}</p>
-              <p>{activeMemory.note}</p>
+              <p className="place">{activeMemory.chapter}</p>
+              <div className="memory-story">
+                {activeMemory.paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </section>
         </div>
