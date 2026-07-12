@@ -74,6 +74,6 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(stylesheet, /\.heartfall \.cookie::after/);
   assert.match(stylesheet, /@keyframes messageFall/);
   assert.match(stylesheet, /\.memory-coda[\s\S]*background: #171221/);
-  assert.match(layout, /romantic pixel-art birthday memory world/i);
+  assert.match(layout, /private little universe/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });

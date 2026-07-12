@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 const title = "For Shadé";
-const description =
-  "A romantic pixel-art birthday memory world celebrating fifty months together.";
+const shareTitle = "Let's enter our world, Shadé.";
+const description = "A private little universe of memories, love, and us.";
 const metadataBase = new URL("https://shadesanna.com");
 
 export const metadata: Metadata = {
@@ -26,14 +26,14 @@ export const metadata: Metadata = {
     shortcut: "/favicon.svg",
   },
   openGraph: {
-    title,
+    title: shareTitle,
     description,
-    images: [{ url: "/og.png", width: 1733, height: 907 }],
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title,
+    title: shareTitle,
     description,
     images: ["/og.png"],
   },
