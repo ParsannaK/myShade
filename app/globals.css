@@ -447,16 +447,35 @@ label:active,
   content: "";
   width: var(--heart-size);
   height: var(--heart-size);
-  border: 3px solid #7a4b2a;
-  border-radius: 4px;
+  border: max(2px, calc(var(--pixel) * 0.72)) solid #6d3a24;
+  border-radius: 50%;
   background:
-    radial-gradient(circle at 34% 34%, #4b2b24 0 2px, transparent 3px),
-    radial-gradient(circle at 66% 48%, #4b2b24 0 2px, transparent 3px),
-    radial-gradient(circle at 46% 70%, #4b2b24 0 2px, transparent 3px),
-    #d99a56;
+    radial-gradient(circle at 29% 31%, #48251e 0 9%, transparent 10%),
+    radial-gradient(circle at 68% 43%, #48251e 0 8%, transparent 9%),
+    radial-gradient(circle at 43% 72%, #48251e 0 8%, transparent 9%),
+    radial-gradient(circle at 72% 76%, #6b3422 0 6%, transparent 7%),
+    radial-gradient(circle at 47% 17%, #f7c982 0 5%, transparent 6%),
+    #d99149;
   box-shadow:
-    2px 2px 0 #7a4b2a,
-    0 0 10px rgba(255, 190, 106, 0.42);
+    inset calc(var(--pixel) * -1) calc(var(--pixel) * -1) 0 #9a552f,
+    inset var(--pixel) var(--pixel) 0 rgba(255, 207, 126, 0.74),
+    2px 2px 0 #4f2b21,
+    0 0 12px rgba(255, 190, 106, 0.48);
+  -webkit-mask: radial-gradient(circle at 92% 18%, transparent 0 14%, #000 15%);
+  mask: radial-gradient(circle at 92% 18%, transparent 0 14%, #000 15%);
+}
+
+.heartfall .cookie::after {
+  content: "";
+  position: absolute;
+  right: calc(var(--pixel) * -0.8);
+  top: calc(var(--pixel) * 0.1);
+  width: var(--pixel);
+  height: var(--pixel);
+  background: #c9793e;
+  box-shadow:
+    calc(var(--pixel) * 1.1) calc(var(--pixel) * 1.3) 0 #6d3a24,
+    calc(var(--pixel) * -0.2) calc(var(--pixel) * 2.1) 0 #e2a158;
 }
 
 .heartfall span:nth-child(1) {
@@ -592,6 +611,23 @@ label:active,
 .heartfall span:nth-child(27) { --heart-left: 61; }
 .heartfall span:nth-child(28) { --heart-left: 86; }
 
+.heartfall span.message {
+  --heart-opacity: 0.24;
+  --heart-duration: 22s;
+  width: auto;
+  height: auto;
+  color: #ffe1a1;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: clamp(0.65rem, 1vw, 0.82rem);
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 0 10px rgba(255, 209, 102, 0.44),
+    2px 2px 0 rgba(75, 42, 44, 0.72);
+  white-space: nowrap;
+  animation-name: messageFall;
+}
+
 @keyframes heartFall {
   0% {
     transform: translate3d(-10px, -70px, 0) rotate(-8deg);
@@ -601,6 +637,18 @@ label:active,
   }
   100% {
     transform: translate3d(-6px, calc(100vh + 90px), 0) rotate(-8deg);
+  }
+}
+
+@keyframes messageFall {
+  0% {
+    transform: translate3d(-12px, -70px, 0) rotate(-2deg);
+  }
+  50% {
+    transform: translate3d(24px, 52vh, 0) rotate(2deg);
+  }
+  100% {
+    transform: translate3d(-4px, calc(100vh + 90px), 0) rotate(-2deg);
   }
 }
 
@@ -791,8 +839,13 @@ label:active,
 }
 
 .section-heading h2 {
-  max-width: 760px;
-  font-size: clamp(2.4rem, 5vw, 5.2rem);
+  max-width: 1040px;
+  font-size: clamp(2.4rem, 4.6vw, 5.2rem);
+}
+
+.section-heading h2 span {
+  display: block;
+  white-space: nowrap;
 }
 
 .section-heading p:not(.eyebrow),
@@ -1339,9 +1392,8 @@ label:active,
   z-index: 2;
   overflow: hidden;
   padding: clamp(72px, 10vw, 140px) clamp(22px, 7vw, 96px);
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255, 209, 102, 0.1), transparent 38%),
-    linear-gradient(180deg, #171221 0%, #151322 58%, #171221 100%);
+  margin-top: -1px;
+  background: #171221;
 }
 
 .memory-coda::before {
@@ -2143,6 +2195,10 @@ label:active,
 
   .world-section {
     padding-inline: 12px;
+  }
+
+  .section-heading h2 span {
+    white-space: normal;
   }
 
   .memory-walk-shell {

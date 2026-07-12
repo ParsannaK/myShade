@@ -157,10 +157,22 @@ const tracks: Track[] = [
   },
 ];
 
-const fallingSprites = Array.from({ length: 28 }, (_, index) => ({
-  id: index,
-  type: index % 4 === 0 ? "cookie" : "heart",
-}));
+const fallingMessages: Record<number, string> = {
+  3: "I love you Shadé",
+  10: "Still choosing you",
+  17: "My love, always",
+  24: "Under every sky",
+};
+
+const fallingSprites = Array.from({ length: 28 }, (_, index) => {
+  const message = fallingMessages[index];
+
+  return {
+    id: index,
+    text: message ?? "",
+    type: message ? "message" : index % 4 === 0 ? "cookie" : "heart",
+  };
+});
 const gateParticles = Array.from({ length: 26 }, (_, index) => index);
 
 export default function Home() {
@@ -376,7 +388,9 @@ export default function Home() {
     <main className="birthday-site">
       <div className="heartfall" aria-hidden="true">
         {fallingSprites.map((sprite) => (
-          <span className={sprite.type} key={sprite.id} />
+          <span className={sprite.type} key={sprite.id}>
+            {sprite.text}
+          </span>
         ))}
       </div>
 
@@ -434,7 +448,10 @@ export default function Home() {
       >
         <div className="section-heading">
           <p className="eyebrow">Our memory path</p>
-          <h2 id="world-title">A little park built from some of our favorite days</h2>
+          <h2 id="world-title">
+            <span>A little park built from</span>
+            <span>some of our favorite days</span>
+          </h2>
           <p>
             Walk with the sunset at your back. Every board holds a
             little piece of us.

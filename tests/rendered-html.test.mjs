@@ -36,7 +36,7 @@ test("server-renders the birthday experience shell", async () => {
 });
 
 test("keeps birthday content and assets wired in", async () => {
-  const [page, memoryContent, layout, packageJson] = await Promise.all([
+  const [page, memoryContent, layout, packageJson, stylesheet] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(
       new URL("../app/memory-walk/memoryContent.ts", import.meta.url),
@@ -44,6 +44,7 @@ test("keeps birthday content and assets wired in", async () => {
     ),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     access(new URL("../public/assets/senior-sunset-swing.png", import.meta.url)),
     access(new URL("../public/assets/shadeSannaStargazing.png", import.meta.url)),
     access(new URL("../public/assets/shade/front.png", import.meta.url)),
@@ -64,10 +65,15 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /birthdayLetter/);
   assert.match(page, /memoryEpilogue/);
   assert.match(page, /const tracks: Track\[\]/);
+  assert.match(page, /I love you Shadé/);
+  assert.match(page, /A little park built from<\/span>/);
   assert.match(memoryContent, /The First Time We Showed Up/);
   assert.match(memoryContent, /The Life We Kept Choosing/);
   assert.match(memoryContent, /These memories are not proof/);
   assert.match(memoryContent, /date: "Add date"/);
+  assert.match(stylesheet, /\.heartfall \.cookie::after/);
+  assert.match(stylesheet, /@keyframes messageFall/);
+  assert.match(stylesheet, /\.memory-coda[\s\S]*background: #171221/);
   assert.match(layout, /romantic pixel-art birthday memory world/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });
