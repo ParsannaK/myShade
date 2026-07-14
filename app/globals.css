@@ -1436,10 +1436,7 @@ label:active,
   overflow: hidden;
   padding: clamp(42px, 7vw, 92px) clamp(18px, 7vw, 96px)
     clamp(82px, 11vw, 148px);
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 209, 102, 0.1), transparent 24%),
-    radial-gradient(circle at 84% 76%, rgba(119, 169, 255, 0.09), transparent 28%),
-    #171221;
+  background: #171221;
 }
 
 .wish-section::before {

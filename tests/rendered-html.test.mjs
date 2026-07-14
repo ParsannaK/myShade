@@ -87,6 +87,7 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(stylesheet, /\.heartfall \.cookie::after/);
   assert.match(stylesheet, /@keyframes messageFall/);
   assert.match(stylesheet, /\.memory-coda[\s\S]*background: #171221/);
+  assert.match(stylesheet, /\.wish-section[\s\S]*background: #171221/);
   assert.match(stylesheet, /\.wish-card[\s\S]*grid-template-columns/);
   assert.match(stylesheet, /@keyframes wishSentTwinkle/);
   assert.match(stylesheet, /color: rgba\(255, 232, 198, 0\.5\)/);
