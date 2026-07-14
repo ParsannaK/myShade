@@ -579,7 +579,7 @@ export default function Home() {
             <h2 id="wish-title">What are you wishing for, my love?</h2>
             <p id="wish-note">
               Leave a wish, a hope, or a thought you want me to hold close. You
-              can send as many as your heart wants.
+              can send as many as your heart wants. Every word you write will become a little star in our sky.
             </p>
           </div>
 
@@ -624,7 +624,7 @@ export default function Home() {
               role="status"
               aria-live="polite"
             >
-              {wishFeedback || "It will find its way quietly to Sanna."}
+              {wishFeedback || "It will find its way quickly to me, your Sanna."}
             </p>
           </form>
 
