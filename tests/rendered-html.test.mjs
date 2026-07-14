@@ -59,16 +59,23 @@ test("keeps birthday content and assets wired in", async () => {
     ),
     access(new URL("../public/photos/README.md", import.meta.url)),
     access(new URL("../public/audio/README.md", import.meta.url)),
+    access(new URL("../public/audio/myHoneybeeCover.m4a", import.meta.url)),
   ]);
 
   assert.match(page, /PASSCODES/);
   assert.match(page, /birthdayLetter/);
   assert.match(page, /memoryEpilogue/);
   assert.match(page, /const tracks: Track\[\]/);
+  assert.ok(
+    page.indexOf("/audio/myHoneybeeCover.m4a") <
+      page.indexOf("/audio/honeybeeOriginal.mp3"),
+  );
+  assert.match(page, /onEnded=\{playNextTrack\}/);
+  assert.match(page, /\(current \+ 1\) % tracks\.length/);
   assert.match(page, /I love you Shadé/);
   assert.match(page, /A little park built from<\/span>/);
   assert.match(page, /tap or click each little light/i);
-  assert.match(page, /aria-describedby="firefly-hint"/);
+  assert.match(page, /foundFireflies\.length === 0/);
   assert.match(memoryContent, /The First Time We Showed Up/);
   assert.match(memoryContent, /The Life We Kept Choosing/);
   assert.match(memoryContent, /These memories are not proof/);

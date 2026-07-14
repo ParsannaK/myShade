@@ -1,5 +1,6 @@
 Current soundtrack files:
 
+- `myHoneybeeCover.m4a`
 - `honeybeeOriginal.mp3`
 - `parisInTheRain.mp3`
 - `adorn.mp3`

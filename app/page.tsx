@@ -141,9 +141,9 @@ const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
 const tracks: Track[] = [
   {
-    title: "honeybee",
-    artist: "Olivia Rodrigo",
-    src: "/audio/honeybeeOriginal.mp3",
+    title: "Honeybee — my cover",
+    artist: "Sanna, for Shadé",
+    src: "/audio/myHoneybeeCover.m4a",
   },
   {
     title: "Paris in the Rain",
@@ -154,6 +154,11 @@ const tracks: Track[] = [
     title: "Adorn",
     artist: "Miguel",
     src: "/audio/adorn.mp3",
+  },
+  {
+    title: "Honeybee",
+    artist: "Olivia Rodrigo",
+    src: "/audio/honeybeeOriginal.mp3",
   },
 ];
 
@@ -191,6 +196,7 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioStatus, setAudioStatus] = useState("Waiting for your first click.");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const autoplayNextTrackRef = useRef(false);
   const reasonTimeoutRef = useRef<number | null>(null);
   const sceneTransitionTimeoutsRef = useRef<number[]>([]);
 
@@ -268,9 +274,17 @@ export default function Home() {
   }
 
   function changeTrack(nextIndex: number) {
+    autoplayNextTrackRef.current = false;
     setTrackIndex(nextIndex);
     setIsPlaying(false);
     setAudioStatus("Ready.");
+  }
+
+  function playNextTrack() {
+    autoplayNextTrackRef.current = true;
+    setIsPlaying(false);
+    setAudioStatus("Loading the next song…");
+    setTrackIndex((current) => (current + 1) % tracks.length);
   }
 
   function revealReason(id: number, reason: string) {
@@ -306,7 +320,22 @@ export default function Home() {
       return;
     }
 
+    const shouldAutoplay = autoplayNextTrackRef.current;
+    autoplayNextTrackRef.current = false;
     audio.load();
+
+    if (shouldAutoplay) {
+      audio
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+          setAudioStatus("Playing.");
+        })
+        .catch(() => {
+          setIsPlaying(false);
+          setAudioStatus("Tap Play when you are ready.");
+        });
+    }
   }, [trackIndex]);
 
   useEffect(() => {
@@ -342,7 +371,7 @@ export default function Home() {
         ref={audioRef}
         src={tracks[trackIndex].src}
         preload="auto"
-        onEnded={() => setIsPlaying(false)}
+        onEnded={playNextTrack}
         onError={() => {
           setIsPlaying(false);
           setAudioStatus("Add the audio file to unlock this track.");
@@ -493,7 +522,7 @@ export default function Home() {
         <div
           className="firefly-field"
           aria-label="Fifty reasons I love you"
-          aria-describedby="firefly-hint"
+          aria-describedby={foundFireflies.length === 0 ? "firefly-hint" : undefined}
         >
           {fireflies.map((firefly) => (
             <button
@@ -522,9 +551,11 @@ export default function Home() {
           ))}
         </div>
         <div className="bridge-copy">
-          <p className="firefly-hint" id="firefly-hint">
-            Tap or click a firefly to reveal a little reason I love you
-          </p>
+          {foundFireflies.length === 0 ? (
+            <p className="firefly-hint" id="firefly-hint">
+              Tap or click a firefly to reveal a little reason I love you
+            </p>
+          ) : null}
           <p>
             And after every golden memory, I would still choose the quiet of the
             night beside you.
