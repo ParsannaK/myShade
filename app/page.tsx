@@ -476,7 +476,7 @@ export default function Home() {
         />
         <p className="scroll-cue">
           {pathReachedNight
-            ? "The night found us. The fireflies are waiting below."
+            ? "The night found us. The fireflies are waiting below — tap or click each little light to reveal one more reason I love you."
             : "With every step we take together, a new star wakes up in the sky."}
         </p>
       </section>
@@ -490,7 +490,11 @@ export default function Home() {
       </section>
 
       <section className="twilight-bridge" aria-label="Twilight transition">
-        <div className="firefly-field" aria-label="Fifty reasons I love you">
+        <div
+          className="firefly-field"
+          aria-label="Fifty reasons I love you"
+          aria-describedby="firefly-hint"
+        >
           {fireflies.map((firefly) => (
             <button
               className={`love-firefly ${
@@ -518,6 +522,9 @@ export default function Home() {
           ))}
         </div>
         <div className="bridge-copy">
+          <p className="firefly-hint" id="firefly-hint">
+            Tap or click a firefly to reveal a little reason I love you
+          </p>
           <p>
             And after every golden memory, I would still choose the quiet of the
             night beside you.

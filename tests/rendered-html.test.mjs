@@ -67,13 +67,20 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /const tracks: Track\[\]/);
   assert.match(page, /I love you Shadé/);
   assert.match(page, /A little park built from<\/span>/);
+  assert.match(page, /tap or click each little light/i);
+  assert.match(page, /aria-describedby="firefly-hint"/);
   assert.match(memoryContent, /The First Time We Showed Up/);
   assert.match(memoryContent, /The Life We Kept Choosing/);
   assert.match(memoryContent, /These memories are not proof/);
-  assert.match(memoryContent, /date: "Add date"/);
+  assert.match(memoryContent, /date: "April 2022"/);
+  assert.match(memoryContent, /date: "November 2025"/);
   assert.match(stylesheet, /\.heartfall \.cookie::after/);
   assert.match(stylesheet, /@keyframes messageFall/);
   assert.match(stylesheet, /\.memory-coda[\s\S]*background: #171221/);
+  assert.match(
+    stylesheet,
+    /\.memory-modal > \.close-button[\s\S]*position: fixed[\s\S]*safe-area-inset-top/,
+  );
   assert.match(layout, /private little universe/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 });

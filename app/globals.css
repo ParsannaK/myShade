@@ -1680,6 +1680,20 @@ label:active,
   text-shadow: 0 12px 36px rgba(0, 0, 0, 0.34);
 }
 
+.bridge-copy .firefly-hint {
+  border: 1px solid rgba(255, 209, 102, 0.34);
+  background: rgba(12, 11, 22, 0.5);
+  color: #ffd166;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: clamp(0.68rem, 1.3vw, 0.82rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  margin: 0 0 22px;
+  padding: 10px 14px;
+  text-transform: uppercase;
+}
+
 .firefly-field {
   position: absolute;
   inset: clamp(6px, 1.8vw, 24px) clamp(4px, 1.4vw, 18px);
@@ -2025,6 +2039,8 @@ label:active,
   font-size: 1.5rem;
   font-weight: 900;
   line-height: 1;
+  touch-action: manipulation;
+  z-index: 5;
 }
 
 .memory-modal {
@@ -2138,6 +2154,17 @@ label:active,
 
   .memory-modal {
     grid-template-columns: 1fr;
+  }
+
+  .memory-modal > .close-button {
+    position: fixed;
+    right: max(16px, calc(env(safe-area-inset-right) + 12px));
+    top: max(16px, calc(env(safe-area-inset-top) + 12px));
+    width: 48px;
+    height: 48px;
+    border-color: #ffe1a1;
+    box-shadow: 0 8px 28px rgba(9, 7, 13, 0.48);
+    z-index: 30;
   }
 
   .memory-photo {
