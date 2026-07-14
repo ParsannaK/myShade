@@ -13,7 +13,12 @@ type Track = {
   src: string;
 };
 
-const PASSCODES = ["shadesanna","shade50", "shadé50", "50months"];
+type WishStatus = "idle" | "sending" | "sent" | "error";
+
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xaqrnlor";
+const WISH_CHARACTER_LIMIT = 1200;
+
+const PASSCODES = ["shadesanna","shade50", "shadé50", "50months", "shade23", "myshade", "sharsanna", "iloveyou"];
 
 const birthdayLetter = [
   "Will write this soon",
@@ -141,7 +146,7 @@ const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
 const tracks: Track[] = [
   {
-    title: "My honeybee",
+    title: "My honeybee (still in progress)",
     artist: "Sanna, for Shadé",
     src: "/audio/honeybeeOriginal.mp3", //temp song for now, will replace with cover
     // src: "/audio/myHoneybeeCover.m4a",
@@ -196,6 +201,9 @@ export default function Home() {
   const [trackIndex, setTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioStatus, setAudioStatus] = useState("Waiting for your first click.");
+  const [wish, setWish] = useState("");
+  const [wishStatus, setWishStatus] = useState<WishStatus>("idle");
+  const [wishFeedback, setWishFeedback] = useState("");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const autoplayNextTrackRef = useRef(false);
   const reasonTimeoutRef = useRef<number | null>(null);
@@ -303,6 +311,49 @@ export default function Home() {
       setReasonVisible(false);
       reasonTimeoutRef.current = null;
     }, 4200);
+  }
+
+  async function submitWish(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const message = wish.trim();
+
+    if (!message) {
+      setWishStatus("error");
+      setWishFeedback("Write a little wish first, my love.");
+      return;
+    }
+
+    setWishStatus("sending");
+    setWishFeedback("Sending your wish into our little sky…");
+
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          _subject: "A wish from Shadé",
+          message,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Wish delivery failed");
+      }
+
+      setWish("");
+      setWishStatus("sent");
+      setWishFeedback(
+        "Your wish became a little star. Send another whenever you want.",
+      );
+    } catch {
+      setWishStatus("error");
+      setWishFeedback(
+        "That wish could not leave just yet. Please try sending it again.",
+      );
+    }
   }
 
   useEffect(() => {
@@ -516,6 +567,76 @@ export default function Home() {
           <p className="eyebrow">After the path</p>
           <h2 id="memory-coda-title">What we built could carry us.</h2>
           <p>{memoryEpilogue}</p>
+        </div>
+      </section>
+
+      <section className="wish-section" aria-labelledby="wish-title">
+        <div
+          className={`wish-card ${wishStatus === "sent" ? "is-sent" : ""}`}
+        >
+          <div className="wish-copy">
+            <p className="eyebrow">One wish under our sky</p>
+            <h2 id="wish-title">What are you wishing for, my love?</h2>
+            <p id="wish-note">
+              Leave a wish, a hope, or a thought you want me to hold close. You
+              can send as many as your heart wants.
+            </p>
+          </div>
+
+          <form className="wish-form" onSubmit={submitWish}>
+            <label htmlFor="wish-message">Your wish or thought</label>
+            <div className="wish-input-frame">
+              <textarea
+                id="wish-message"
+                name="message"
+                value={wish}
+                maxLength={WISH_CHARACTER_LIMIT}
+                onChange={(event) => {
+                  setWish(event.target.value);
+                  if (wishStatus !== "sending") {
+                    setWishStatus("idle");
+                    setWishFeedback("");
+                  }
+                }}
+                placeholder="I wish…"
+                aria-describedby="wish-note wish-status"
+                disabled={wishStatus === "sending"}
+                required
+              />
+              <span className="wish-count" aria-hidden="true">
+                {wish.length}/{WISH_CHARACTER_LIMIT}
+              </span>
+            </div>
+            <button
+              className="wish-submit"
+              type="submit"
+              disabled={wishStatus === "sending" || !wish.trim()}
+            >
+              {wishStatus === "sending"
+                ? "Sending your wish…"
+                : wishStatus === "sent"
+                  ? "Send another wish"
+                  : "Send this wish"}
+            </button>
+            <p
+              className={`wish-status is-${wishStatus}`}
+              id="wish-status"
+              role="status"
+              aria-live="polite"
+            >
+              {wishFeedback || "It will find its way quietly to Sanna."}
+            </p>
+          </form>
+
+          {wishStatus === "sent" ? (
+            <div className="wish-sparkles" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+          ) : null}
         </div>
       </section>
 

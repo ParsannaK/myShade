@@ -66,13 +66,16 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /birthdayLetter/);
   assert.match(page, /memoryEpilogue/);
   assert.match(page, /const tracks: Track\[\]/);
-  assert.ok(
-    page.indexOf("/audio/myHoneybeeCover.m4a") <
-      page.indexOf("/audio/honeybeeOriginal.mp3"),
-  );
+  assert.match(page, /\/audio\/myHoneybeeCover\.m4a/);
+  assert.match(page, /\/audio\/honeybeeOriginal\.mp3/);
   assert.match(page, /onEnded=\{playNextTrack\}/);
   assert.match(page, /\(current \+ 1\) % tracks\.length/);
-  assert.match(page, /I love you Shadé/);
+  assert.match(page, /https:\/\/formspree\.io\/f\/xaqrnlor/);
+  assert.match(page, /async function submitWish/);
+  assert.match(page, /method: "POST"/);
+  assert.match(page, /Your wish became a little star/);
+  assert.match(page, /className="wish-section"/);
+  assert.match(page, /I love you, my Shadé/);
   assert.match(page, /A little park built from<\/span>/);
   assert.match(page, /tap or click each little light/i);
   assert.match(page, /foundFireflies\.length === 0/);
@@ -84,6 +87,9 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(stylesheet, /\.heartfall \.cookie::after/);
   assert.match(stylesheet, /@keyframes messageFall/);
   assert.match(stylesheet, /\.memory-coda[\s\S]*background: #171221/);
+  assert.match(stylesheet, /\.wish-card[\s\S]*grid-template-columns/);
+  assert.match(stylesheet, /@keyframes wishSentTwinkle/);
+  assert.match(stylesheet, /color: rgba\(255, 232, 198, 0\.5\)/);
   assert.match(
     stylesheet,
     /\.memory-modal > \.close-button[\s\S]*position: fixed[\s\S]*safe-area-inset-top/,
