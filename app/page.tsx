@@ -25,18 +25,18 @@ const birthdayLetter = [
 ];
 
 const loveReasons = [
-  "You make ordinary days feel like something I want to remember.",
-  "Your laugh feels like home to me.",
-  "You make me want to become softer, braver, and better.",
-  "You have a way of making the world feel less heavy.",
+  "You make ordinary days worth remembering :)",
+  "Your laugh fills my heart with joy.",
+  "You make me want to become more confident, braver, and better.",
+  "You make the world feel less heavy.",
   "I love the way your joy fills a room.",
   "You understand parts of me I do not always know how to explain.",
-  "You are gentle in ways that stay with me.",
+  "You are the most gentle and caring person I know.",
   "You make love feel playful, safe, and real.",
   "I love how deeply you care.",
   "You are my favorite person to miss and my favorite person to come back to.",
   "Your smile can change the whole shape of my day.",
-  "You make the future feel warm instead of scary.",
+  "You make the future feel like a place I want to go to.",
   "I love how we can be silly together.",
   "You are beautiful in the loud moments and the quiet ones.",
   "You make me feel chosen.",
@@ -44,12 +44,12 @@ const loveReasons = [
   "Being loved by you feels like sunlight.",
   "I love how your presence calms me.",
   "You make every memory brighter just by being in it.",
-  "I love the way you dream.",
+  "I love the way you love me.",
   "You are kind in ways that make me proud to know you.",
   "I love hearing your voice.",
   "You make me laugh when I need it most.",
   "You are my safest place.",
-  "I love how we have our own tiny language.",
+  "I love how we have our own way of talking, and our own inside jokes.",
   "You make distance feel worth enduring.",
   "I love the way you look at the world.",
   "You make me believe in forever one day at a time.",
@@ -61,9 +61,9 @@ const loveReasons = [
   "I love your strength.",
   "You make the smallest moments feel sacred.",
   "I love the way you care about the people you love.",
-  "You are my favorite hello.",
+  "You are the smartest person I know, and the most beautiful.",
   "You are the hardest goodbye.",
-  "I love that we keep choosing each other.",
+  "I love what we have built together.",
   "You make love feel like a place I can live in.",
   "I love your patience with me.",
   "You make my heart feel known.",
@@ -74,7 +74,7 @@ const loveReasons = [
   "You are magic in the most human way.",
   "I love that my favorite memories all seem to lead back to you.",
   "You are my little universe.",
-  "Because after fifty months, I still know I would choose you again.",
+  "There is no one I would rather be with thank you, my Shadé.",
 ];
 
 function buildNameFormation() {
@@ -141,9 +141,10 @@ const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
 const tracks: Track[] = [
   {
-    title: "Honeybee — my cover",
+    title: "My honeybee",
     artist: "Sanna, for Shadé",
-    src: "/audio/myHoneybeeCover.m4a",
+    src: "/audio/honeybeeOriginal.mp3", //temp song for now, will replace with cover
+    // src: "/audio/myHoneybeeCover.m4a",
   },
   {
     title: "Paris in the Rain",
@@ -163,7 +164,7 @@ const tracks: Track[] = [
 ];
 
 const fallingMessages: Record<number, string> = {
-  3: "I love you Shadé",
+  3: "I love you, my Shadé",
   10: "Still choosing you",
   17: "My love, always",
   24: "Under every sky",
@@ -564,7 +565,7 @@ export default function Home() {
             className={`reason-card ${reasonVisible ? "is-visible" : ""}`}
             aria-live="polite"
           >
-            <span>One little light says</span>
+            <span>One little firefly says</span>
             <strong>{selectedReason}</strong>
           </div>
         </div>
