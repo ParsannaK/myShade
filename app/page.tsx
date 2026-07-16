@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { FormEvent, useEffect, useRef, useState } from "react";
 
+import { birthdayLetter } from "./birthdayLetter";
 import MemoryWalk from "./memory-walk/MemoryWalk";
 import { memories, memoryEpilogue } from "./memory-walk/memoryContent";
 import type { StoryMemory as Memory } from "./memory-walk/memoryContent";
@@ -19,15 +20,6 @@ const FORMSPREE_ENDPOINT = "https://formspree.io/f/xaqrnlor";
 const WISH_CHARACTER_LIMIT = 1200;
 
 const PASSCODES = ["shadesanna","shade50", "shadé50", "50months", "shade23", "myshade", "sharsanna", "iloveyou"];
-
-const birthdayLetter = [
-  "Will write this soon",
-  // "My love, happy birthday.",
-  // "By the time this day arrives, we will have loved each other through fifty months of ordinary days, impossible days, silly days, and the kind of days I wish I could bottle forever.",
-  // "I made this little world because I wanted you to have a place that feels like us: warm, playful, full of memories, and completely yours. Every stop is one more way of saying that I see you, I choose you, and I am so grateful I get to love you.",
-  // "You are my favorite person, my safest place, and the future I keep reaching for. If I could give you the world, I would start here.",
-  // "I love you endlessly.",
-];
 
 const loveReasons = [
   "You make ordinary days worth remembering :)",
@@ -483,7 +475,7 @@ export default function Home() {
         />
         <div className="hero-shade" />
         <div className="hero-content">
-          <h1 id="hero-title">Happy 22nd birthday my Shadé</h1>
+          <h1 id="hero-title">You became home to me, my Shadé</h1>
           <p>
             In every lifetime, in every little world, my heart would still find
             its way back to you.
@@ -492,7 +484,7 @@ export default function Home() {
         <button
           className="floating-letter"
           onClick={() => setLetterOpen(true)}
-          aria-label="Open birthday letter"
+          aria-label="Open Sanna's letter to Shadé"
         >
           <span />
         </button>
@@ -727,11 +719,20 @@ export default function Home() {
             >
               ×
             </button>
-            <p className="eyebrow">A letter for you</p>
-            <h2 id="letter-title">Still working on the letter</h2>
-            {birthdayLetter.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
+            <p className="eyebrow">To my one and only</p>
+            <h2 id="letter-title">To my dearest Shadé,</h2>
+            <div className="letter-body">
+              {birthdayLetter.map((paragraph, index) => (
+                <p
+                  className={
+                    paragraph.style ? `letter-${paragraph.style}` : undefined
+                  }
+                  key={`${paragraph.style ?? "body"}-${index}`}
+                >
+                  {paragraph.text}
+                </p>
+              ))}
+            </div>
           </section>
         </div>
       ) : null}
