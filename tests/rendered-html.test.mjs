@@ -84,6 +84,7 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /A little park built from<\/span>/);
   assert.match(page, /tap or click each little light/i);
   assert.match(page, /foundFireflies\.length === 0/);
+  assert.match(page, /firefly-hint[\s\S]*is-dismissed/);
   assert.match(letter, /you became home to me/);
   assert.match(letter, /Your hurt is real, Shadé, and I believe it/);
   assert.match(letter, /With all my heart,\\nSanna/);
@@ -99,6 +100,8 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(stylesheet, /\.wish-card[\s\S]*grid-template-columns/);
   assert.match(stylesheet, /@keyframes wishSentTwinkle/);
   assert.match(stylesheet, /color: rgba\(255, 232, 198, 0\.5\)/);
+  assert.match(stylesheet, /\.firefly-hint\.is-dismissed[\s\S]*visibility: hidden/);
+  assert.match(stylesheet, /\.floating-letter[\s\S]*width: 112px/);
   assert.match(stylesheet, /\.letter-modal p\.letter-opening/);
   assert.match(stylesheet, /\.letter-modal p\.letter-signature/);
   assert.match(

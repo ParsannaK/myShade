@@ -568,10 +568,9 @@ export default function Home() {
         >
           <div className="wish-copy">
             <p className="eyebrow">One wish under our sky</p>
-            <h2 id="wish-title">What are you wishing for, my love?</h2>
+            <h2 id="wish-title">What shall we write across the rest of our sky?</h2>
             <p id="wish-note">
-              Leave a wish, a hope, or a thought you want me to hold close. You
-              can send as many as your heart wants. Every word you write will become a little star in our sky.
+              Our story has always been built on the quiet hopes we whispered to each other in the dark. Leave a wish, a dream, or a thought you want me to hold close to my heart. Every word you write becomes a new star in our sky, and I promise to carry them with me, always.
             </p>
           </div>
 
@@ -665,11 +664,15 @@ export default function Home() {
           ))}
         </div>
         <div className="bridge-copy">
-          {foundFireflies.length === 0 ? (
-            <p className="firefly-hint" id="firefly-hint">
-              Tap or click a firefly to reveal a little reason I love you
-            </p>
-          ) : null}
+          <p
+            className={`firefly-hint ${
+              foundFireflies.length > 0 ? "is-dismissed" : ""
+            }`}
+            id="firefly-hint"
+            aria-hidden={foundFireflies.length > 0}
+          >
+            Tap or click a firefly to reveal a little reason I love you
+          </p>
           <p>
             And after every golden memory, I would still choose the quiet of the
             night beside you.
