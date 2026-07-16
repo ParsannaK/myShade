@@ -98,6 +98,7 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(stylesheet, /\.memory-coda[\s\S]*background: #171221/);
   assert.match(stylesheet, /\.wish-section[\s\S]*background: #171221/);
   assert.match(stylesheet, /\.wish-card[\s\S]*grid-template-columns/);
+  assert.match(stylesheet, /\.wish-copy h2[\s\S]*clamp\(2rem, 3\.6vw, 3\.9rem\)/);
   assert.match(stylesheet, /@keyframes wishSentTwinkle/);
   assert.match(stylesheet, /color: rgba\(255, 232, 198, 0\.5\)/);
   assert.match(stylesheet, /\.firefly-hint\.is-dismissed[\s\S]*visibility: hidden/);

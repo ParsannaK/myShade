@@ -1507,8 +1507,8 @@ label:active,
 
 .wish-copy h2 {
   color: #fff7ea;
-  font-size: clamp(2.25rem, 4.4vw, 4.9rem);
-  line-height: 0.98;
+  font-size: clamp(2rem, 3.6vw, 3.9rem);
+  line-height: 1.04;
   margin: 0 0 24px;
 }
 
