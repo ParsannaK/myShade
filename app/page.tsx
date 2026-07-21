@@ -15,9 +15,20 @@ type Track = {
 };
 
 type WishStatus = "idle" | "sending" | "sent" | "error";
+type NarrationStatus = "idle" | "loading" | "playing" | "paused" | "ended" | "error";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xaqrnlor";
 const WISH_CHARACTER_LIMIT = 1200;
+const LETTER_NARRATION_SRC = "/audio/TempLetterReading.m4a";
+
+const narrationStatusCopy: Record<NarrationStatus, string> = {
+  idle: "Press play whenever you are ready, my love.",
+  loading: "Opening this little voice note…",
+  playing: "Sanna is reading to you.",
+  paused: "Paused right here for you.",
+  ended: "The letter has reached its final line.",
+  error: "The recording could not play. Please try again.",
+};
 
 const PASSCODES = ["shadesanna","shade50", "shadé50", "50months", "shade23", "myshade", "sharsanna", "iloveyou"];
 
@@ -138,9 +149,9 @@ const memoryWalkMemories = memories.map(({ id, title }) => ({ id, title }));
 
 const tracks: Track[] = [
   {
-    title: "My honeybee (still in progress)",
+    title: "My honeybee",
     artist: "Sanna, for Shadé",
-    src: "/audio/honeybeeOriginal.mp3", //temp song for now, will replace with cover
+    src: "/audio/myHoneybeeCover.m4a", //temp song for now, will replace with cover
     // src: "/audio/myHoneybeeCover.m4a",
   },
   {
@@ -178,6 +189,16 @@ const fallingSprites = Array.from({ length: 28 }, (_, index) => {
 });
 const gateParticles = Array.from({ length: 26 }, (_, index) => index);
 
+function formatAudioTime(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    return "0:00";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+}
+
 export default function Home() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [passcode, setPasscode] = useState("");
@@ -196,7 +217,11 @@ export default function Home() {
   const [wish, setWish] = useState("");
   const [wishStatus, setWishStatus] = useState<WishStatus>("idle");
   const [wishFeedback, setWishFeedback] = useState("");
+  const [narrationStatus, setNarrationStatus] = useState<NarrationStatus>("idle");
+  const [narrationTime, setNarrationTime] = useState(0);
+  const [narrationDuration, setNarrationDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const narrationRef = useRef<HTMLAudioElement | null>(null);
   const autoplayNextTrackRef = useRef(false);
   const reasonTimeoutRef = useRef<number | null>(null);
   const sceneTransitionTimeoutsRef = useRef<number[]>([]);
@@ -286,6 +311,60 @@ export default function Home() {
     setIsPlaying(false);
     setAudioStatus("Loading the next song…");
     setTrackIndex((current) => (current + 1) % tracks.length);
+  }
+
+  function pauseBackgroundMusicForNarration() {
+    const backgroundMusic = audioRef.current;
+
+    if (backgroundMusic && !backgroundMusic.paused) {
+      backgroundMusic.pause();
+      setIsPlaying(false);
+      setAudioStatus("Paused for your letter.");
+    }
+  }
+
+  async function playNarration({ restart = false } = {}) {
+    const narration = narrationRef.current;
+
+    if (!narration) {
+      return;
+    }
+
+    pauseBackgroundMusicForNarration();
+
+    if (
+      restart ||
+      narration.ended ||
+      (narration.duration > 0 && narration.currentTime >= narration.duration)
+    ) {
+      narration.currentTime = 0;
+      setNarrationTime(0);
+    }
+
+    setNarrationStatus("loading");
+
+    try {
+      await narration.play();
+      setNarrationStatus("playing");
+    } catch {
+      setNarrationStatus("error");
+    }
+  }
+
+  function toggleNarration() {
+    const narration = narrationRef.current;
+
+    if (!narration) {
+      return;
+    }
+
+    if (!narration.paused) {
+      narration.pause();
+      setNarrationStatus("paused");
+      return;
+    }
+
+    void playNarration();
   }
 
   function revealReason(id: number, reason: string) {
@@ -420,6 +499,31 @@ export default function Home() {
           setIsPlaying(false);
           setAudioStatus("Add the audio file to unlock this track.");
         }}
+      />
+      <audio
+        ref={narrationRef}
+        src={LETTER_NARRATION_SRC}
+        preload="metadata"
+        onLoadedMetadata={(event) => {
+          setNarrationDuration(event.currentTarget.duration);
+        }}
+        onDurationChange={(event) => {
+          setNarrationDuration(event.currentTarget.duration);
+        }}
+        onTimeUpdate={(event) => {
+          setNarrationTime(event.currentTarget.currentTime);
+        }}
+        onPlay={() => setNarrationStatus("playing")}
+        onPause={(event) => {
+          if (!event.currentTarget.ended) {
+            setNarrationStatus("paused");
+          }
+        }}
+        onEnded={(event) => {
+          setNarrationTime(event.currentTarget.duration);
+          setNarrationStatus("ended");
+        }}
+        onError={() => setNarrationStatus("error")}
       />
 
       {!isUnlocked ? (
@@ -724,6 +828,65 @@ export default function Home() {
             </button>
             <p className="eyebrow">To my one and only</p>
             <h2 id="letter-title">To my dearest Shadé,</h2>
+            <div
+              className={`letter-narration is-${narrationStatus}`}
+              aria-label="Listen to Sanna read this letter"
+            >
+              <div className="letter-narration-copy">
+                <span>Listen to my voice</span>
+                <strong aria-live="polite">
+                  {narrationStatusCopy[narrationStatus]}
+                </strong>
+              </div>
+              <div className="letter-narration-actions">
+                <button
+                  className="letter-narration-play"
+                  type="button"
+                  onClick={toggleNarration}
+                  disabled={narrationStatus === "loading"}
+                  aria-label={
+                    narrationStatus === "playing"
+                      ? "Pause Sanna reading the letter"
+                      : "Play Sanna reading the letter"
+                  }
+                >
+                  <span aria-hidden="true">
+                    {narrationStatus === "playing" ? "Ⅱ" : "▶"}
+                  </span>
+                  {narrationStatus === "playing"
+                    ? "Pause reading"
+                    : narrationStatus === "loading"
+                      ? "Starting…"
+                      : "Play reading"}
+                </button>
+                <button
+                  className="letter-narration-restart"
+                  type="button"
+                  onClick={() => void playNarration({ restart: true })}
+                  disabled={narrationStatus === "loading"}
+                >
+                  <span aria-hidden="true">↺</span>
+                  Restart
+                </button>
+              </div>
+              <div className="letter-narration-progress">
+                <span>{formatAudioTime(narrationTime)}</span>
+                <progress
+                  aria-label="Letter narration progress"
+                  max={narrationDuration || 1}
+                  value={Math.min(narrationTime, narrationDuration || 1)}
+                />
+                <span>
+                  {narrationDuration > 0
+                    ? formatAudioTime(narrationDuration)
+                    : "–:––"}
+                </span>
+              </div>
+              <p>
+                You can close this letter while I read. My voice will stay with
+                you.
+              </p>
+            </div>
             <div className="letter-body">
               {birthdayLetter.map((paragraph, index) => (
                 <p

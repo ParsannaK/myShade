@@ -61,6 +61,7 @@ test("keeps birthday content and assets wired in", async () => {
     access(new URL("../public/photos/README.md", import.meta.url)),
     access(new URL("../public/audio/README.md", import.meta.url)),
     access(new URL("../public/audio/myHoneybeeCover.m4a", import.meta.url)),
+    access(new URL("../public/audio/TempLetterReading.m4a", import.meta.url)),
     access(
       new URL("../public/assets/To my one and only.md", import.meta.url),
     ),
@@ -73,6 +74,7 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /const tracks: Track\[\]/);
   assert.match(page, /\/audio\/myHoneybeeCover\.m4a/);
   assert.match(page, /\/audio\/honeybeeOriginal\.mp3/);
+  assert.match(page, /\/audio\/TempLetterReading\.m4a/);
   assert.match(page, /onEnded=\{playNextTrack\}/);
   assert.match(page, /\(current \+ 1\) % tracks\.length/);
   assert.match(page, /https:\/\/formspree\.io\/f\/xaqrnlor/);
@@ -85,6 +87,12 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /tap or click each little light/i);
   assert.match(page, /foundFireflies\.length === 0/);
   assert.match(page, /firefly-hint[\s\S]*is-dismissed/);
+  assert.match(page, /pauseBackgroundMusicForNarration/);
+  assert.match(page, /backgroundMusic\.pause\(\)/);
+  assert.match(page, /ref=\{narrationRef\}[\s\S]*preload="metadata"/);
+  assert.match(page, /onEnded=\{\(event\) => \{[\s\S]*setNarrationStatus\("ended"\)/);
+  assert.match(page, /className="letter-narration-play"/);
+  assert.match(page, /className="letter-narration-restart"/);
   assert.match(letter, /you became home to me/);
   assert.match(letter, /Your hurt is real, Shadé, and I believe it/);
   assert.match(letter, /With all my heart,\\nSanna/);
@@ -105,6 +113,8 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(stylesheet, /\.floating-letter[\s\S]*width: 112px/);
   assert.match(stylesheet, /\.letter-modal p\.letter-opening/);
   assert.match(stylesheet, /\.letter-modal p\.letter-signature/);
+  assert.match(stylesheet, /\.letter-narration-actions[\s\S]*grid-template-columns/);
+  assert.match(stylesheet, /\.letter-narration-progress progress/);
   assert.match(
     stylesheet,
     /\.memory-modal > \.close-button[\s\S]*position: fixed[\s\S]*safe-area-inset-top/,
