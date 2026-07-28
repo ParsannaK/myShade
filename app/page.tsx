@@ -19,7 +19,7 @@ type NarrationStatus = "idle" | "loading" | "playing" | "paused" | "ended" | "er
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xaqrnlor";
 const WISH_CHARACTER_LIMIT = 1200;
-const LETTER_NARRATION_SRC = "/audio/TempLetterReading.m4a";
+const LETTER_NARRATION_SRC = "/audio/ToMyOneAndOnly.m4a";
 
 const narrationStatusCopy: Record<NarrationStatus, string> = {
   idle: "Press play whenever you are ready, my love.",
@@ -160,14 +160,14 @@ const tracks: Track[] = [
     src: "/audio/parisInTheRain.mp3",
   },
   {
+    title: "So Easy to Fall in Love",
+    artist: "Olivia Dean",
+    src: "/audio/soEasyToFallInLove.mp3",
+  },
+  {
     title: "Adorn",
     artist: "Miguel",
     src: "/audio/adorn.mp3",
-  },
-  {
-    title: "Honeybee",
-    artist: "Olivia Rodrigo",
-    src: "/audio/honeybeeOriginal.mp3",
   },
 ];
 

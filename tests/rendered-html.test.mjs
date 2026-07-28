@@ -61,7 +61,7 @@ test("keeps birthday content and assets wired in", async () => {
     access(new URL("../public/photos/README.md", import.meta.url)),
     access(new URL("../public/audio/README.md", import.meta.url)),
     access(new URL("../public/audio/myHoneybeeCover.m4a", import.meta.url)),
-    access(new URL("../public/audio/TempLetterReading.m4a", import.meta.url)),
+    access(new URL("../public/audio/ToMyOneAndOnly.m4a", import.meta.url)),
     access(
       new URL("../public/assets/To my one and only.md", import.meta.url),
     ),
@@ -73,8 +73,7 @@ test("keeps birthday content and assets wired in", async () => {
   assert.match(page, /memoryEpilogue/);
   assert.match(page, /const tracks: Track\[\]/);
   assert.match(page, /\/audio\/myHoneybeeCover\.m4a/);
-  assert.match(page, /\/audio\/honeybeeOriginal\.mp3/);
-  assert.match(page, /\/audio\/TempLetterReading\.m4a/);
+  assert.match(page, /\/audio\/ToMyOneAndOnly\.m4a/);
   assert.match(page, /onEnded=\{playNextTrack\}/);
   assert.match(page, /\(current \+ 1\) % tracks\.length/);
   assert.match(page, /https:\/\/formspree\.io\/f\/xaqrnlor/);
