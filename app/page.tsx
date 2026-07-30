@@ -24,7 +24,7 @@ const LETTER_NARRATION_SRC = "/audio/ToMyOneAndOnly.m4a";
 const narrationStatusCopy: Record<NarrationStatus, string> = {
   idle: "Press play whenever you are ready, my love.",
   loading: "Opening this little voice note…",
-  playing: "Sanna is reading to you.",
+  playing: "Reading to you.",
   paused: "Paused right here for you.",
   ended: "The letter has reached its final line.",
   error: "The recording could not play. Please try again.",
