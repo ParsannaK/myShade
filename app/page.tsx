@@ -151,7 +151,7 @@ const tracks: Track[] = [
   {
     title: "My honeybee",
     artist: "Sanna, for Shadé",
-    src: "/audio/myHoneybeeCover.m4a", //temp song for now, will replace with cover
+    src: "/audio/myHoneybee.mp3", //temp song for now, will replace with cover
     // src: "/audio/myHoneybeeCover.m4a",
   },
   {
