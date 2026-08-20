@@ -30,7 +30,7 @@ const narrationStatusCopy: Record<NarrationStatus, string> = {
   error: "The recording could not play. Please try again.",
 };
 
-const PASSCODES = ["shadesanna","shade50", "shadé50", "50months", "shade23", "myshade", "sharsanna", "iloveyou"];
+const PASSCODES = ["shadesanna","shade50", "shadé50", "50months", "0727", "myshade", "sharsanna", "iloveyou", "youaremine"];
 
 const loveReasons = [
   "You make ordinary days worth remembering :)",
@@ -47,13 +47,13 @@ const loveReasons = [
   "You make the future feel like a place I want to go to.",
   "I love how we can be silly together.",
   "You are beautiful in the loud moments and the quiet ones.",
-  "You make me feel chosen.",
+  "I love the birthmark on your leg",
   "I love the little things you remember.",
-  "Being loved by you feels like sunlight.",
+  "Being loved by you feels like sunlight, sunshine ;)",
   "I love how your presence calms me.",
   "You make every memory brighter just by being in it.",
   "I love the way you love me.",
-  "You are kind in ways that make me proud to know you.",
+  "I love your small nose",
   "I love hearing your voice.",
   "You make me laugh when I need it most.",
   "You are my safest place.",
@@ -63,16 +63,16 @@ const loveReasons = [
   "You make me believe in forever one day at a time.",
   "I love your heart.",
   "You are the person I want beside me in every version of life.",
-  "I love how naturally you became part of my prayers and plans.",
-  "You make me feel lucky in the deepest way.",
+  "I love your dimples",
+  "You make me feel lucky in the deepest way",
   "I love your softness.",
-  "I love your strength.",
-  "You make the smallest moments feel sacred.",
-  "I love the way you care about the people you love.",
-  "You are the smartest person I know, and the most beautiful.",
+  "You make me feel speciar",
+  "You make the smallest moments feel sacred",
+  "I love the way you care about the people you love",
+  "You are the smartest person I know, and the most beautiful",
   "You are the hardest goodbye.",
   "I love what we have built together.",
-  "You make love feel like a place I can live in.",
+  "You are the most wonderful person ever",
   "I love your patience with me.",
   "You make my heart feel known.",
   "I love how beautiful your mind is.",
@@ -719,7 +719,7 @@ export default function Home() {
               role="status"
               aria-live="polite"
             >
-              {wishFeedback || "It will find its way quickly to me, your Sanna."}
+              {wishFeedback || "It will find its way quickly to me :)"}
             </p>
           </form>
 
