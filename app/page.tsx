@@ -541,7 +541,7 @@ export default function Home() {
             From the day we met, I have been building a world for us in my heart, and I want to share it with you, my Shadé.
           </p>
           <form onSubmit={unlock} className="passcode-form">
-            <label htmlFor="passcode">Passcode</label>
+            <label htmlFor="passcode">Password</label>
             <div className="passcode-row">
               <input
                 id="passcode"
