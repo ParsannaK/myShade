@@ -260,6 +260,50 @@ test("records only allowlisted anonymous telemetry and protects the dashboard", 
   );
   assert.equal(authorized.status, 200);
   assert.match(await authorized.text(), /Little signs that Shadé came home/);
+
+  const basicAuthorization = `Basic ${Buffer.from("sanna:test-secret").toString("base64")}`;
+  const confirmation = await worker.fetch(
+    new Request("http://localhost/sanna-insights/reset", {
+      headers: { Authorization: basicAuthorization },
+    }),
+    env,
+    workerContext,
+  );
+  assert.equal(confirmation.status, 200);
+  assert.match(await confirmation.text(), /Clear every little footprint/);
+
+  const crossSiteReset = await worker.fetch(
+    new Request("http://localhost/sanna-insights/reset", {
+      method: "POST",
+      headers: {
+        Authorization: basicAuthorization,
+        "Content-Type": "application/x-www-form-urlencoded",
+        Origin: "https://example.com",
+      },
+      body: "confirmation=clear-all",
+    }),
+    env,
+    workerContext,
+  );
+  assert.equal(crossSiteReset.status, 403);
+  assert.equal(db.inserts.length, 1);
+
+  const cleared = await worker.fetch(
+    new Request("http://localhost/sanna-insights/reset", {
+      method: "POST",
+      headers: {
+        Authorization: basicAuthorization,
+        "Content-Type": "application/x-www-form-urlencoded",
+        Origin: "http://localhost",
+      },
+      body: "confirmation=clear-all",
+    }),
+    env,
+    workerContext,
+  );
+  assert.equal(cleared.status, 303);
+  assert.equal(cleared.headers.get("location"), "/sanna-insights?cleared=1");
+  assert.match(db.inserts.at(-1).query, /DELETE FROM telemetry_events/);
 });
 
 test("keeps the telemetry contract private and deployable", async () => {
@@ -287,6 +331,8 @@ test("keeps the telemetry contract private and deployable", async () => {
   assert.match(worker, /TELEMETRY_DASHBOARD_PASSWORD/);
   assert.match(worker, /INSERT OR IGNORE INTO telemetry_events/);
   assert.match(worker, /url\.pathname === "\/sanna-insights"/);
+  assert.match(worker, /url\.pathname === "\/sanna-insights\/reset"/);
+  assert.match(worker, /DELETE FROM telemetry_events/);
   assert.match(worker, /https:\/\/shadesanna\.com/);
   assert.match(worker, /telemetryPreflight/);
   assert.match(telemetry, /"site_entered"/);

@@ -124,12 +124,35 @@ function privateHeaders(contentType = "text/html; charset=utf-8") {
   return {
     "Cache-Control": "no-store, private",
     "Content-Security-Policy":
-      "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+      "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
     "Content-Type": contentType,
     "Referrer-Policy": "no-referrer",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
   };
+}
+
+function dashboardAccessError(request: Request, env: Env): Response | null {
+  const password = env.TELEMETRY_DASHBOARD_PASSWORD;
+  if (!password) {
+    return new Response("Dashboard configuration is unavailable.", {
+      status: 503,
+      headers: privateHeaders("text/plain; charset=utf-8"),
+    });
+  }
+
+  if (!dashboardAuthorized(request, password)) {
+    return new Response("Authentication required.", {
+      status: 401,
+      headers: {
+        ...privateHeaders("text/plain; charset=utf-8"),
+        "WWW-Authenticate":
+          'Basic realm="Sanna private insights", charset="UTF-8"',
+      },
+    });
+  }
+
+  return null;
 }
 
 function telemetryCorsHeaders(origin: string | null): Record<string, string> {
@@ -263,23 +286,8 @@ function renderBars(rows: CountRow[], emptyCopy: string): string {
 }
 
 async function renderInsights(request: Request, env: Env): Promise<Response> {
-  const password = env.TELEMETRY_DASHBOARD_PASSWORD;
-  if (!password) {
-    return new Response("Dashboard configuration is unavailable.", {
-      status: 503,
-      headers: privateHeaders("text/plain; charset=utf-8"),
-    });
-  }
-
-  if (!dashboardAuthorized(request, password)) {
-    return new Response("Authentication required.", {
-      status: 401,
-      headers: {
-        ...privateHeaders("text/plain; charset=utf-8"),
-        "WWW-Authenticate": 'Basic realm="Sanna private insights", charset="UTF-8"',
-      },
-    });
-  }
+  const accessError = dashboardAccessError(request, env);
+  if (accessError) return accessError;
 
   const [summaryRow, eventResult, memoryResult, visitResult, recentResult] =
     await Promise.all([
@@ -399,8 +407,9 @@ async function renderInsights(request: Request, env: Env): Promise<Response> {
         .metric{display:grid;gap:8px;padding:24px}.metric>span,.panel h2{color:#ffd166;font-size:.76rem;letter-spacing:.08em;text-transform:uppercase}.metric>strong{font-family:Arial,sans-serif;font-size:clamp(2.3rem,5vw,4rem)}.metric small{color:#929bb7;line-height:1.5}
         .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.panel{padding:26px}.panel h2{margin:0 0 24px}.bar-row{margin:0 0 18px}.bar-label{display:flex;justify-content:space-between;gap:16px;margin-bottom:8px;color:#dfe8ff;font-size:.82rem}.bar-track{height:10px;border:1px solid rgba(255,209,102,.44);background:#231b31}.bar-track span{display:block;height:100%;background:linear-gradient(90deg,#c96868,#ffd166)}
         .timeline{list-style:none;margin:0;padding:0}.timeline li{display:grid;grid-template-columns:1fr auto;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,225,161,.12);color:#dfe8ff;font-size:.79rem;line-height:1.5}.timeline time{color:#8791ae;text-align:right}.empty{color:#929bb7;line-height:1.6}.privacy{margin-top:26px;color:#8791ae;font-size:.75rem;line-height:1.7}
+        .cleared{margin:0 0 28px;padding:16px 18px;border:1px solid rgba(137,221,173,.5);background:rgba(40,105,72,.2);color:#c8f5d8;line-height:1.6}.danger{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:42px;padding:24px;border:1px solid rgba(255,143,143,.26);background:rgba(73,24,35,.18)}.danger h2{margin:0 0 8px;font-family:Arial,sans-serif;font-size:1.18rem}.danger p{max-width:720px;margin:0;color:#929bb7;font-family:Arial,sans-serif;line-height:1.55}.reset-link{flex:0 0 auto;padding:13px 16px;border:1px solid rgba(255,143,143,.62);color:#ffd7d7;text-decoration:none;font-weight:800}.reset-link:hover,.reset-link:focus-visible{background:rgba(255,143,143,.14);outline:2px solid #ffd166;outline-offset:3px}
         @media(max-width:760px){main{padding-top:40px}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.timeline li{grid-template-columns:1fr}.timeline time{text-align:left}}
-        @media(max-width:480px){.metrics{grid-template-columns:1fr}.metric,.panel{padding:20px}}
+        @media(max-width:600px){.danger{align-items:stretch;flex-direction:column}.reset-link{text-align:center}}@media(max-width:480px){.metrics{grid-template-columns:1fr}.metric,.panel{padding:20px}}
       </style>
     </head>
     <body>
@@ -408,6 +417,7 @@ async function renderInsights(request: Request, env: Env): Promise<Response> {
         <p class="eyebrow">For Sanna’s eyes only</p>
         <h1>Little signs that Shadé came home.</h1>
         <p class="intro">A private, anonymous view of visits and moments explored in your little universe. Counting begins with this release.</p>
+        ${new URL(request.url).searchParams.get("cleared") === "1" ? '<p class="cleared" role="status">All test data has been cleared. The next successful entry will begin your true count at one.</p>' : ""}
         <p class="updated">Last visit: ${escapeHtml(formatDashboardDate(summary.lastVisit))} ET</p>
         <section class="metrics" aria-label="Key totals">${cards}</section>
         <div class="grid">
@@ -417,11 +427,101 @@ async function renderInsights(request: Request, env: Env): Promise<Response> {
           <section class="panel"><h2>Recent moments</h2>${recentMarkup}</section>
         </div>
         <p class="privacy">Privacy by design: this dashboard stores random session IDs, event names, optional memory/firefly numbers, and timestamps only. It never stores passcodes, wishes, letter text, IP-derived locations, or device details.</p>
+        <section class="danger" aria-labelledby="reset-heading">
+          <div><h2 id="reset-heading">Finished testing?</h2><p>Clear every recorded visit and interaction so the next successful entry becomes visit one.</p></div>
+          <a class="reset-link" href="/sanna-insights/reset">Reset test data</a>
+        </section>
       </main>
     </body>
   </html>`;
 
   return new Response(html, { headers: privateHeaders() });
+}
+
+async function renderResetConfirmation(
+  request: Request,
+  env: Env,
+): Promise<Response> {
+  const accessError = dashboardAccessError(request, env);
+  if (accessError) return accessError;
+
+  const countRow = await env.DB.prepare(
+    "SELECT COUNT(*) AS count FROM telemetry_events",
+  ).first<{ count: number }>();
+  const eventCount = safeNumber(countRow?.count);
+
+  const html = `<!doctype html>
+  <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta name="robots" content="noindex,nofollow,noarchive" />
+      <title>Reset Sanna’s private insights</title>
+      <style>
+        :root{color-scheme:dark;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#171221;color:#fff7ea}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 25%,rgba(201,104,104,.12),transparent 38%),#171221}.card{width:min(680px,100%);padding:clamp(28px,7vw,64px);border:2px solid rgba(255,209,102,.48);background:rgba(11,9,19,.86);box-shadow:8px 8px 0 rgba(0,0,0,.3)}.eyebrow{margin:0;color:#ffd166;font-size:.78rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}h1{margin:14px 0 20px;font-family:Arial,sans-serif;font-size:clamp(2.5rem,8vw,5.2rem);line-height:.95;letter-spacing:-.04em}p{color:#bfc7df;font-family:Arial,sans-serif;font-size:1rem;line-height:1.7}.count{color:#ffe1a1;font-family:inherit;font-weight:800}.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:32px}.actions form{display:grid}.actions button,.actions a{min-height:52px;display:grid;place-items:center;padding:13px 16px;border:1px solid rgba(255,209,102,.52);font:800 .84rem/1.2 ui-monospace,SFMono-Regular,Menlo,monospace;text-decoration:none;cursor:pointer}.actions button{width:100%;background:#8b3f4f;color:#fff7ea}.actions a{background:#211a2d;color:#fff7ea}.actions button:hover,.actions button:focus-visible,.actions a:hover,.actions a:focus-visible{outline:2px solid #ffd166;outline-offset:3px;filter:brightness(1.12)}.note{margin:18px 0 0;color:#929bb7;font-family:inherit;font-size:.78rem}@media(max-width:520px){.actions{grid-template-columns:1fr}}
+      </style>
+    </head>
+    <body>
+      <main class="card">
+        <p class="eyebrow">One last check</p>
+        <h1>Clear every little footprint?</h1>
+        <p>This permanently deletes <span class="count">${eventCount} recorded moment${eventCount === 1 ? "" : "s"}</span>, including all visits and interactions collected so far.</p>
+        <p>Nothing from the website itself will be changed. Afterward, the next successful passcode entry starts the true count at one.</p>
+        <div class="actions">
+          <form method="post" action="/sanna-insights/reset">
+            <input type="hidden" name="confirmation" value="clear-all" />
+            <button type="submit">Yes, clear all data</button>
+          </form>
+          <a href="/sanna-insights">Keep my stats</a>
+        </div>
+        <p class="note">This cannot be undone.</p>
+      </main>
+    </body>
+  </html>`;
+
+  return new Response(html, { headers: privateHeaders() });
+}
+
+async function clearTelemetry(request: Request, env: Env): Promise<Response> {
+  const accessError = dashboardAccessError(request, env);
+  if (accessError) return accessError;
+
+  const requestUrl = new URL(request.url);
+  if (request.headers.get("origin") !== requestUrl.origin) {
+    return new Response("This reset request was not accepted.", {
+      status: 403,
+      headers: privateHeaders("text/plain; charset=utf-8"),
+    });
+  }
+
+  if (
+    !request.headers
+      .get("content-type")
+      ?.startsWith("application/x-www-form-urlencoded")
+  ) {
+    return new Response("This reset request was not accepted.", {
+      status: 415,
+      headers: privateHeaders("text/plain; charset=utf-8"),
+    });
+  }
+
+  const form = await request.formData();
+  if (form.get("confirmation") !== "clear-all") {
+    return new Response("Confirmation is required.", {
+      status: 400,
+      headers: privateHeaders("text/plain; charset=utf-8"),
+    });
+  }
+
+  await env.DB.prepare("DELETE FROM telemetry_events").run();
+
+  return new Response(null, {
+    status: 303,
+    headers: {
+      ...privateHeaders(),
+      Location: "/sanna-insights?cleared=1",
+    },
+  });
 }
 
 // Image security config. SVG sources with .svg extension auto-skip the
@@ -446,6 +546,16 @@ const worker = {
 
     if (url.pathname === "/sanna-insights" && request.method === "GET") {
       return renderInsights(request, env);
+    }
+
+    if (url.pathname === "/sanna-insights/reset") {
+      if (request.method === "GET") {
+        return renderResetConfirmation(request, env);
+      }
+
+      if (request.method === "POST") {
+        return clearTelemetry(request, env);
+      }
     }
 
     if (url.pathname === "/_vinext/image") {
