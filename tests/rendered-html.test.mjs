@@ -184,7 +184,7 @@ test("records only allowlisted anonymous telemetry and protects the dashboard", 
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Origin: "http://localhost",
+        Origin: "https://shadesanna.com",
       },
       body: JSON.stringify({
         eventName: "letter_opened",
@@ -197,6 +197,10 @@ test("records only allowlisted anonymous telemetry and protects the dashboard", 
   );
 
   assert.equal(recorded.status, 204);
+  assert.equal(
+    recorded.headers.get("access-control-allow-origin"),
+    "https://shadesanna.com",
+  );
   assert.deepEqual(db.inserts[0].bindings, [
     "letter_opened",
     "anonymous-session-123",
@@ -222,6 +226,20 @@ test("records only allowlisted anonymous telemetry and protects the dashboard", 
 
   assert.equal(rejected.status, 400);
   assert.equal(db.inserts.length, 1);
+
+  const preflight = await worker.fetch(
+    new Request("http://localhost/api/telemetry", {
+      method: "OPTIONS",
+      headers: { Origin: "https://shadesanna.com" },
+    }),
+    env,
+    workerContext,
+  );
+  assert.equal(preflight.status, 204);
+  assert.equal(
+    preflight.headers.get("access-control-allow-origin"),
+    "https://shadesanna.com",
+  );
 
   const unauthorized = await worker.fetch(
     new Request("http://localhost/sanna-insights"),
@@ -260,18 +278,27 @@ test("keeps the telemetry contract private and deployable", async () => {
     ]);
 
   assert.match(hosting, /"d1": "DB"/);
-  assert.doesNotMatch(nextConfig, /output:\s*["']export["']/);
+  assert.match(
+    nextConfig,
+    /process\.env\.GITHUB_ACTIONS === "true" \? "export" : undefined/,
+  );
   assert.match(schema, /telemetry_events/);
   assert.match(migration, /CREATE TABLE `telemetry_events`/);
   assert.match(worker, /TELEMETRY_DASHBOARD_PASSWORD/);
   assert.match(worker, /INSERT OR IGNORE INTO telemetry_events/);
   assert.match(worker, /url\.pathname === "\/sanna-insights"/);
+  assert.match(worker, /https:\/\/shadesanna\.com/);
+  assert.match(worker, /telemetryPreflight/);
   assert.match(telemetry, /"site_entered"/);
   assert.match(telemetry, /"letter_opened"/);
   assert.match(telemetry, /"firefly_clicked"/);
   assert.match(page, /recordTelemetry\("site_entered"\)/);
   assert.match(page, /recordTelemetry\("letter_opened"\)/);
   assert.match(page, /recordTelemetry\("firefly_clicked"/);
+  assert.match(
+    page,
+    /shade-memory-world\.prosanna\.chatgpt\.site\/api\/telemetry/,
+  );
   assert.match(
     page,
     /It never[\s\S]*saves passwords, wishes, messages, or personal details/,

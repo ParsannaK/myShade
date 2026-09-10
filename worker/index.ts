@@ -22,6 +22,11 @@ interface ExecutionContext {
 }
 
 const TELEMETRY_EVENT_NAME_SET = new Set<string>(TELEMETRY_EVENT_NAMES);
+const TELEMETRY_ALLOWED_ORIGINS = new Set([
+  "https://shadesanna.com",
+  "https://www.shadesanna.com",
+  "https://parsannak.github.io",
+]);
 
 const EVENT_LABELS: Record<string, string> = {
   site_entered: "Entered the world",
@@ -127,31 +132,79 @@ function privateHeaders(contentType = "text/html; charset=utf-8") {
   };
 }
 
+function telemetryCorsHeaders(origin: string | null): Record<string, string> {
+  if (!origin || !TELEMETRY_ALLOWED_ORIGINS.has(origin)) {
+    return {};
+  }
+
+  return {
+    "Access-Control-Allow-Origin": origin,
+    Vary: "Origin",
+  };
+}
+
+function telemetryResponse(status: number, origin: string | null) {
+  return new Response(null, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      ...telemetryCorsHeaders(origin),
+    },
+  });
+}
+
+function telemetryPreflight(request: Request) {
+  const requestUrl = new URL(request.url);
+  const origin = request.headers.get("origin");
+  const originAllowed =
+    origin === requestUrl.origin ||
+    (origin !== null && TELEMETRY_ALLOWED_ORIGINS.has(origin));
+
+  if (!originAllowed) {
+    return telemetryResponse(403, origin);
+  }
+
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Max-Age": "86400",
+      "Cache-Control": "no-store",
+      ...telemetryCorsHeaders(origin),
+    },
+  });
+}
+
 async function recordTelemetry(request: Request, env: Env): Promise<Response> {
   const requestUrl = new URL(request.url);
   const origin = request.headers.get("origin");
-  if (origin && origin !== requestUrl.origin) {
-    return new Response(null, { status: 403 });
+  if (
+    origin &&
+    origin !== requestUrl.origin &&
+    !TELEMETRY_ALLOWED_ORIGINS.has(origin)
+  ) {
+    return telemetryResponse(403, origin);
   }
 
   if (!request.headers.get("content-type")?.startsWith("application/json")) {
-    return new Response(null, { status: 415 });
+    return telemetryResponse(415, origin);
   }
 
   const contentLength = Number(request.headers.get("content-length") ?? "0");
   if (contentLength > 2048) {
-    return new Response(null, { status: 413 });
+    return telemetryResponse(413, origin);
   }
 
   let payload: unknown;
   try {
     payload = await request.json();
   } catch {
-    return new Response(null, { status: 400 });
+    return telemetryResponse(400, origin);
   }
 
   if (!payload || typeof payload !== "object") {
-    return new Response(null, { status: 400 });
+    return telemetryResponse(400, origin);
   }
 
   const { eventName, sessionId, detail = "" } = payload as Record<
@@ -168,7 +221,7 @@ async function recordTelemetry(request: Request, env: Env): Promise<Response> {
     detail.length > 64 ||
     !/^[a-zA-Z0-9_-]*$/.test(detail)
   ) {
-    return new Response(null, { status: 400 });
+    return telemetryResponse(400, origin);
   }
 
   await env.DB.prepare(
@@ -179,10 +232,7 @@ async function recordTelemetry(request: Request, env: Env): Promise<Response> {
     .bind(eventName, sessionId, detail)
     .run();
 
-  return new Response(null, {
-    status: 204,
-    headers: { "Cache-Control": "no-store" },
-  });
+  return telemetryResponse(204, origin);
 }
 
 function formatDashboardDate(timestamp: number | null): string {
@@ -384,8 +434,14 @@ const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === "/api/telemetry" && request.method === "POST") {
-      return recordTelemetry(request, env);
+    if (url.pathname === "/api/telemetry") {
+      if (request.method === "OPTIONS") {
+        return telemetryPreflight(request);
+      }
+
+      if (request.method === "POST") {
+        return recordTelemetry(request, env);
+      }
     }
 
     if (url.pathname === "/sanna-insights" && request.method === "GET") {

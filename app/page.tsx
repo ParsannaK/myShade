@@ -19,6 +19,8 @@ type WishStatus = "idle" | "sending" | "sent" | "error";
 type NarrationStatus = "idle" | "loading" | "playing" | "paused" | "ended" | "error";
 
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/xaqrnlor";
+const TELEMETRY_ENDPOINT =
+  "https://shade-memory-world.prosanna.chatgpt.site/api/telemetry";
 const WISH_CHARACTER_LIMIT = 1200;
 const LETTER_NARRATION_SRC = "/audio/ToMyOneAndOnly.m4a";
 
@@ -250,7 +252,11 @@ export default function Home() {
 
     telemetryMilestonesRef.current.add(milestoneKey);
 
-    void fetch("/api/telemetry", {
+    const endpoint = window.location.hostname.endsWith(".chatgpt.site")
+      ? "/api/telemetry"
+      : TELEMETRY_ENDPOINT;
+
+    void fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
