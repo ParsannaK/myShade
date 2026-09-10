@@ -288,13 +288,31 @@ test("records only allowlisted anonymous telemetry and protects the dashboard", 
   assert.equal(crossSiteReset.status, 403);
   assert.equal(db.inserts.length, 1);
 
+  const opaqueCrossSiteReset = await worker.fetch(
+    new Request("http://localhost/sanna-insights/reset", {
+      method: "POST",
+      headers: {
+        Authorization: basicAuthorization,
+        "Content-Type": "application/x-www-form-urlencoded",
+        Origin: "null",
+        "Sec-Fetch-Site": "cross-site",
+      },
+      body: "confirmation=clear-all",
+    }),
+    env,
+    workerContext,
+  );
+  assert.equal(opaqueCrossSiteReset.status, 403);
+  assert.equal(db.inserts.length, 1);
+
   const cleared = await worker.fetch(
     new Request("http://localhost/sanna-insights/reset", {
       method: "POST",
       headers: {
         Authorization: basicAuthorization,
         "Content-Type": "application/x-www-form-urlencoded",
-        Origin: "http://localhost",
+        Origin: "null",
+        "Sec-Fetch-Site": "same-origin",
       },
       body: "confirmation=clear-all",
     }),

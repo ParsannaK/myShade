@@ -487,7 +487,11 @@ async function clearTelemetry(request: Request, env: Env): Promise<Response> {
   if (accessError) return accessError;
 
   const requestUrl = new URL(request.url);
-  if (request.headers.get("origin") !== requestUrl.origin) {
+  const origin = request.headers.get("origin");
+  const browserConfirmedSameOrigin =
+    origin === "null" && request.headers.get("sec-fetch-site") === "same-origin";
+
+  if (origin !== requestUrl.origin && !browserConfirmedSameOrigin) {
     return new Response("This reset request was not accepted.", {
       status: 403,
       headers: privateHeaders("text/plain; charset=utf-8"),
