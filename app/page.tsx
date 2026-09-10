@@ -7,6 +7,7 @@ import { birthdayLetter } from "./birthdayLetter";
 import MemoryWalk from "./memory-walk/MemoryWalk";
 import { memories, memoryEpilogue } from "./memory-walk/memoryContent";
 import type { StoryMemory as Memory } from "./memory-walk/memoryContent";
+import type { TelemetryEventName } from "../lib/telemetry";
 
 type Track = {
   title: string;
@@ -223,14 +224,57 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const narrationRef = useRef<HTMLAudioElement | null>(null);
   const autoplayNextTrackRef = useRef(false);
+  const telemetrySessionIdRef = useRef("");
+  const telemetryMilestonesRef = useRef(new Set<string>());
   const reasonTimeoutRef = useRef<number | null>(null);
   const sceneTransitionTimeoutsRef = useRef<number[]>([]);
+
+  function getTelemetrySessionId() {
+    if (telemetrySessionIdRef.current) {
+      return telemetrySessionIdRef.current;
+    }
+
+    telemetrySessionIdRef.current = crypto.randomUUID();
+
+    return telemetrySessionIdRef.current;
+  }
+
+  function recordTelemetry(
+    eventName: TelemetryEventName,
+    detail = "",
+  ) {
+    const milestoneKey = `${eventName}:${detail}`;
+    if (telemetryMilestonesRef.current.has(milestoneKey)) {
+      return;
+    }
+
+    telemetryMilestonesRef.current.add(milestoneKey);
+
+    void fetch("/api/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventName,
+        sessionId: getTelemetrySessionId(),
+        detail,
+      }),
+      keepalive: true,
+    }).catch(() => {
+      // Telemetry is intentionally best-effort and never interrupts the gift.
+    });
+  }
+
+  function openLetter() {
+    setLetterOpen(true);
+    recordTelemetry("letter_opened");
+  }
 
   function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const normalized = passcode.trim().toLowerCase();
 
     if (PASSCODES.includes(normalized)) {
+      recordTelemetry("site_entered");
       const audio = audioRef.current;
 
       if (audio) {
@@ -346,6 +390,7 @@ export default function Home() {
     try {
       await narration.play();
       setNarrationStatus("playing");
+      recordTelemetry("letter_narration_played");
     } catch {
       setNarrationStatus("error");
     }
@@ -368,6 +413,7 @@ export default function Home() {
   }
 
   function revealReason(id: number, reason: string) {
+    recordTelemetry("firefly_clicked", `firefly-${id}`);
     setFoundFireflies((current) => (
       current.includes(id) ? current : [...current, id]
     ));
@@ -416,6 +462,7 @@ export default function Home() {
 
       setWish("");
       setWishStatus("sent");
+      recordTelemetry("wish_sent");
       setWishFeedback(
         "Your wish became a little star. Send another whenever you want.",
       );
@@ -587,7 +634,7 @@ export default function Home() {
         </div>
         <button
           className="floating-letter"
-          onClick={() => setLetterOpen(true)}
+          onClick={openLetter}
           aria-label="Open Sanna's letter to Shadé"
         >
           <span />
@@ -641,11 +688,13 @@ export default function Home() {
             const memory = memories.find((item) => item.id === memoryId);
             if (memory) {
               setActiveMemory(memory);
+              recordTelemetry("memory_opened", memoryId);
             }
           }}
           onProgressChange={(progress) => {
             if (progress >= 0.92) {
               setPathReachedNight(true);
+              recordTelemetry("memory_walk_completed");
             }
           }}
           paused={Boolean(activeMemory || letterOpen)}
@@ -808,6 +857,15 @@ export default function Home() {
           </p>
         </div>
       </section>
+
+      <aside className="privacy-whisper" aria-label="A note about this private world">
+        <span aria-hidden="true">✦</span>
+        <p>
+          This private world remembers anonymous visits and the moments you
+          choose to explore, so Sanna can know which pieces found you. It never
+          saves passwords, wishes, messages, or personal details.
+        </p>
+      </aside>
 
       {letterOpen ? (
         <div className="modal-backdrop" role="presentation">

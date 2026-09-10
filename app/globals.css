@@ -2202,6 +2202,37 @@ label:active,
   margin: 0;
 }
 
+.privacy-whisper {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: -1px;
+  padding: 24px max(24px, env(safe-area-inset-right)) 34px
+    max(24px, env(safe-area-inset-left));
+  border-top: 1px solid rgba(255, 209, 102, 0.1);
+  background: #060815;
+  color: rgba(223, 232, 255, 0.5);
+  font-family: var(--font-pixel), monospace;
+  font-size: clamp(0.76rem, 1.25vw, 0.88rem);
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.privacy-whisper span {
+  flex: 0 0 auto;
+  color: rgba(255, 209, 102, 0.64);
+  text-shadow: 0 0 12px rgba(255, 209, 102, 0.32);
+}
+
+.privacy-whisper p {
+  max-width: 820px;
+  margin: 0;
+}
+
 .star-word {
   display: inline-block;
   margin-right: 0.22em;

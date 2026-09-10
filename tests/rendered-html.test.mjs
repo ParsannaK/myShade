@@ -2,25 +2,73 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function loadWorker() {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
+  return worker;
+}
+
+const workerContext = {
+  waitUntil() {},
+  passThroughOnException() {},
+};
+
+const assetFetcher = {
+  fetch: async () => new Response("Not found", { status: 404 }),
+};
+
+async function render() {
+  const worker = await loadWorker();
 
   return worker.fetch(
     new Request("http://localhost/", {
       headers: { accept: "text/html" },
     }),
     {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
+      ASSETS: assetFetcher,
     },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
+    workerContext,
   );
+}
+
+function createTelemetryDb() {
+  const inserts = [];
+
+  return {
+    inserts,
+    prepare(query) {
+      const statement = {
+        bindings: [],
+        bind(...bindings) {
+          statement.bindings = bindings;
+          return statement;
+        },
+        async run() {
+          inserts.push({ query, bindings: statement.bindings });
+          return { success: true };
+        },
+        async first() {
+          return {
+            visits: 0,
+            visitsLastSevenDays: 0,
+            letterOpens: 0,
+            narrationPlays: 0,
+            memoryOpens: 0,
+            fireflyClicks: 0,
+            completedWalks: 0,
+            wishesSent: 0,
+            lastVisit: null,
+          };
+        },
+        async all() {
+          return { results: [] };
+        },
+      };
+
+      return statement;
+    },
+  };
 }
 
 test("server-renders the birthday experience shell", async () => {
@@ -120,4 +168,113 @@ test("keeps birthday content and assets wired in", async () => {
   );
   assert.match(layout, /private little universe/i);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
+});
+
+test("records only allowlisted anonymous telemetry and protects the dashboard", async () => {
+  const worker = await loadWorker();
+  const db = createTelemetryDb();
+  const env = {
+    ASSETS: assetFetcher,
+    DB: db,
+    TELEMETRY_DASHBOARD_PASSWORD: "test-secret",
+  };
+
+  const recorded = await worker.fetch(
+    new Request("http://localhost/api/telemetry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost",
+      },
+      body: JSON.stringify({
+        eventName: "letter_opened",
+        sessionId: "anonymous-session-123",
+        detail: "",
+      }),
+    }),
+    env,
+    workerContext,
+  );
+
+  assert.equal(recorded.status, 204);
+  assert.deepEqual(db.inserts[0].bindings, [
+    "letter_opened",
+    "anonymous-session-123",
+    "",
+  ]);
+
+  const rejected = await worker.fetch(
+    new Request("http://localhost/api/telemetry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Origin: "http://localhost",
+      },
+      body: JSON.stringify({
+        eventName: "passcode_entered",
+        sessionId: "anonymous-session-123",
+        detail: "a-password-must-never-be-stored",
+      }),
+    }),
+    env,
+    workerContext,
+  );
+
+  assert.equal(rejected.status, 400);
+  assert.equal(db.inserts.length, 1);
+
+  const unauthorized = await worker.fetch(
+    new Request("http://localhost/sanna-insights"),
+    env,
+    workerContext,
+  );
+  assert.equal(unauthorized.status, 401);
+  assert.match(unauthorized.headers.get("www-authenticate") ?? "", /Basic/);
+
+  const authorized = await worker.fetch(
+    new Request("http://localhost/sanna-insights", {
+      headers: {
+        Authorization: `Basic ${Buffer.from("sanna:test-secret").toString("base64")}`,
+      },
+    }),
+    env,
+    workerContext,
+  );
+  assert.equal(authorized.status, 200);
+  assert.match(await authorized.text(), /Little signs that Shadé came home/);
+});
+
+test("keeps the telemetry contract private and deployable", async () => {
+  const [page, worker, schema, telemetry, hosting, nextConfig, migration] =
+    await Promise.all([
+      readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+      readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+      readFile(new URL("../lib/telemetry.ts", import.meta.url), "utf8"),
+      readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+      readFile(new URL("../next.config.ts", import.meta.url), "utf8"),
+      readFile(
+        new URL("../drizzle/0000_lowly_maverick.sql", import.meta.url),
+        "utf8",
+      ),
+    ]);
+
+  assert.match(hosting, /"d1": "DB"/);
+  assert.doesNotMatch(nextConfig, /output:\s*["']export["']/);
+  assert.match(schema, /telemetry_events/);
+  assert.match(migration, /CREATE TABLE `telemetry_events`/);
+  assert.match(worker, /TELEMETRY_DASHBOARD_PASSWORD/);
+  assert.match(worker, /INSERT OR IGNORE INTO telemetry_events/);
+  assert.match(worker, /url\.pathname === "\/sanna-insights"/);
+  assert.match(telemetry, /"site_entered"/);
+  assert.match(telemetry, /"letter_opened"/);
+  assert.match(telemetry, /"firefly_clicked"/);
+  assert.match(page, /recordTelemetry\("site_entered"\)/);
+  assert.match(page, /recordTelemetry\("letter_opened"\)/);
+  assert.match(page, /recordTelemetry\("firefly_clicked"/);
+  assert.match(
+    page,
+    /It never[\s\S]*saves passwords, wishes, messages, or personal details/,
+  );
+  assert.doesNotMatch(page, /recordTelemetry\([^\n]*passcode/i);
 });

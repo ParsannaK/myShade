@@ -1,5 +1,13 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789077835692,
+      "tag": "0000_lowly_maverick",
+      "breakpoints": true
+    }
+  ]
 }
