@@ -591,7 +591,7 @@ export default function Home() {
           <div className="gate-kicker">For Shadé</div>
           <h1 id="gate-title">Let&apos;s enter our little world</h1>
           <p>
-            From the day we met, I have been building a world for us in my heart, and I want to share it with you, my Shadé.
+            Still here, still thinking of you, still hoping for you, my Shadé.
           </p>
           <form onSubmit={unlock} className="passcode-form">
             <label htmlFor="passcode">Password</label>
